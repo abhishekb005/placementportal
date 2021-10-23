@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import redirect, render
-from .forms import StudentSignUpForm
+from django.shortcuts import redirect, render,HttpResponse
+from .forms import StudentSignUpForm , StudentForm
 from django.contrib import messages
 from django.contrib.auth import login, authenticate,logout
 from django.contrib.auth.decorators import login_required
@@ -9,6 +9,7 @@ from .models import *
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
+        return HttpResponse('<h1> index Page </h1>') 
         render(request,'placementapp/dashboard.html',{'user':request.user})
     else:
         if request.method=="POST":
@@ -46,6 +47,20 @@ def signup(request):
         else:
             form=StudentSignUpForm()
         return render(request,'placementapp/signup.html',{'form':form})
+
+def StudentUpdate(request):
+    if request.user.is_authenticated:
+        if request.user.user_type==1:
+            stu=Student.objects.get(user=request.user)
+            if request.method=='POST':
+                form=StudentForm(request.POST,instance=stu)
+                if form.is_valid():
+                    form.save()
+            else:
+                form=StudentForm(instance=stu)
+            return render(request,'placementapp/testform.html',{'form':form})
+
+                    
 
 def studentdashboard(request):
     return render(request,'placementapp/dashboard.html')
@@ -151,13 +166,13 @@ def getStudentApplied(request):
 # Create New Offer for Particular Position -Create A form then save
 # Update Existing Offer
 #  
-# # Delete Offer
-# def deleteOffer(request,id):
-#     offer=Offers.objects.get(pk=id)
-#     offer.delete()
-#     return None
+# Delete Offer
+def deleteOffer(request,id):
+    offer=Offers.objects.get(pk=id)
+    offer.delete()
+    return None
 #Update or assign Offer to those Student who applied for the position and got selected
-
+#NEw
 
 
 

@@ -25,11 +25,17 @@ class Degree(models.Model):
     Total_Sem=models.PositiveIntegerField(null=True,blank=True)
     Min_credit=models.IntegerField(null=True,blank=True,)
 
+    def __str__():
+        return f"{self.Degree_Name}"
+
 class Branch(models.Model):
     #Branch_Code=models.CharField()
     Branch_Name=models.CharField(max_length=40,)
     Degree=models.ManyToManyField(to=Degree)
     Start_year=models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return f"{self.Branch_Name} {self.Degree} {self.Start_year}"
 
 # Abstract Model i.e it wont be created in database Table
 # Its Parent Class For Mentor and PlacementOfficer    
@@ -99,6 +105,7 @@ class Student(models.Model):
     mentor=models.ForeignKey(to=Mentor,on_delete=models.SET_NULL,null=True,blank=True)
     PlacementCell=models.ForeignKey(to=PlacementCell,null=True,blank=True,on_delete=models.SET_NULL)
     AppliedPositions=models.ManyToManyField(to=Position,through='Applied')
+
 # Databse Will Be Created and its inheriting Staff
 class PlacementOfficer(Staff):
     user=models.OneToOneField(to=User,on_delete=models.CASCADE,primary_key=True)
@@ -119,11 +126,9 @@ class MessageP2C(Message):
     sender=models.ForeignKey(to=PlacementCell,on_delete=models.CASCADE)
     receivers=models.ManyToManyField(to=Company)
 
-
 class MessageC2P(Message):
     sender=models.ForeignKey(to=Company,on_delete=models.CASCADE)
     receivers=models.ForeignKey(to=PlacementCell,on_delete=models.CASCADE)
-    
     
 class Offers(models.Model):
     Position=models.ForeignKey(to=Position,on_delete=models.CASCADE)

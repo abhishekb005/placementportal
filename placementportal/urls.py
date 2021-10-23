@@ -21,8 +21,10 @@ from placementapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/',views.signup ),
+    path('studUpdate/',views.StudentUpdate,name="StudUpdate"),
     url(r"^accounts/",include("django.contrib.auth.urls")),
-    url(r"^dashboard/",views.studentdashboard,name="dashboard"),
+    #url(r"^dashboard/",views.studentdashboard,name="dashboard"),
+    path('dashboard/',views.studentdashboard,name='dashboard'),
     path("login",views.userlogin,name="login"),
     path("logout",views.userlogout,name="logout"),
 ]
