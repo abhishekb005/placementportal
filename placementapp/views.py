@@ -151,11 +151,11 @@ def getStudentApplied(request):
 # Create New Offer for Particular Position -Create A form then save
 # Update Existing Offer
 #  
-# Delete Offer
-def deleteOffer(request,id):
-    offer=Offers.objects.get(pk=id)
-    offer.delete()
-    return None
+# # Delete Offer
+# def deleteOffer(request,id):
+#     offer=Offers.objects.get(pk=id)
+#     offer.delete()
+#     return None
 #Update or assign Offer to those Student who applied for the position and got selected
 
 
