@@ -25,7 +25,7 @@ class Degree(models.Model):
     Total_Sem=models.PositiveIntegerField(null=True,blank=True)
     Min_credit=models.IntegerField(null=True,blank=True,)
 
-    def __str__():
+    def __str__(self):
         return f"{self.Degree_Name}"
 
 class Branch(models.Model):
