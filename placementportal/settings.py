@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'placementapp',
+
 ]
+# faker.DEFAULT_PROVIDERS is loaded (all)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

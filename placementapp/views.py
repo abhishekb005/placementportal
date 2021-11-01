@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import redirect, render,HttpResponse
-from .forms import StudentSignUpForm , StudentForm
+from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404
+from .forms import *
 from django.contrib import messages
 from django.contrib.auth import login, authenticate,logout
 from django.contrib.auth.decorators import login_required
@@ -48,6 +48,28 @@ def signup(request):
             form=StudentSignUpForm()
         return render(request,'placementapp/signup.html',{'form':form})
 
+def applyForPosition(request,id):
+    varuser=request.user
+    if varuser.is_authenticated and varuser.user_type==1:
+        Stu=Student.objects.get(user=varuser)
+        pos=Position.objects.get(pk=id)
+        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.branch==Stu.Branch:
+            Applied.objects.create(Position=pos,Student=Stu)
+        else:
+            print("")
+
+def StudentList(request):
+    varuser=request.user
+    if varuser.user_type==4:
+        mentr=Mentor.objects.get(user=varuser)
+        Stu=Student.objects.filter(mentor=mentr)
+        return Stu
+
+def VerifyStudent(request):
+    varuser=request.user
+    if varuser.user_type==4:
+        Student.objects.filter(mentor__user=varuser)
+
 def StudentUpdate(request):
     if request.user.is_authenticated:
         if request.user.user_type==1:
@@ -60,13 +82,13 @@ def StudentUpdate(request):
                 form=StudentForm(instance=stu)
             return render(request,'placementapp/testform.html',{'form':form})
 
-                    
-
 def studentdashboard(request):
     return render(request,'placementapp/dashboard.html')
 def companydashboard(request):
     pass
 def placementoffdashboard(request):
+    pass
+def mentordashboard(request):
     pass
 
 def getallPosition(request):
@@ -103,13 +125,12 @@ def getallPosition(request):
 def getMsg2S(request):
     varuser=request.user
     msg=None
-    if varuser.is_authenticated and varuser.user_type==1 and varuser.verified:
+    if varuser.is_authenticated and varuser.user_type==1 :
         stu=Student.objects.get(user=varuser)
         msg=MessageP2S.objects.filter(receivers=stu).order_by('TimeStamps')
     if varuser.is_authenticated and varuser.user_type==2 and varuser.verified:
         msg=MessageP2S.objects.all().order_by('TimeStamps')
     return msg
-
 
 def getMsg2C(request):
     varuser=request.user
@@ -174,5 +195,81 @@ def deleteOffer(request,id):
 #Update or assign Offer to those Student who applied for the position and got selected
 #NEw
 
+def StudentDetail(request,id):
+    varuser=request.user
+    if varuser.user_type==4:
+        Stu=Student.objects.get(pk=id)
+        if Stu is None:
+            return None
+        else:
+            return Stu
+
+def createPosition(request):
+    if request.method=='POST':
+        form=PositionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/dashboard')
+    else:
+        form=PositionForm()
+        return render(request,'placementapp/createposition.html',{'form':form})
+    return render(request,'placementapp/createposition.html',{'form':form})
+    
+
+def UpdatePosition(request,_id):
+    try:
+        old_data = get_object_or_404(Position,id =_id)
+    except Exception:
+        raise Http404('Does Not Exist')
+ 
+    if request.method =='POST':
+        form =PositionForm(request.POST, instance =old_data)
+ 
+        if form.is_valid():
+            form.save()
+            return redirect(f'/Position/update/{_id}')
+    else:
+        form = PositionForm(instance = old_data)
+        context ={
+            'form':form
+        }
+        return render(request,'placementapp/createposition.html',context)
 
 
+def DeletePosition(request,_id):
+    try:
+        data = get_object_or_404(Position,id =_id)
+    except Exception:
+        raise Http404('Does Not Exist')
+ 
+    if request.method == 'POST':
+        data.delete()
+        return redirect('/')
+    else:
+        return render(request, 'placementapp/deleteposition.html')
+
+def CreateOffer(request):
+    if request.user.user_type==3 or request.user.user_type==2 and request.user.verified:
+
+        if request.method=='POST':
+            form=OfferForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('/')
+        else:
+            form=OfferForm()
+            return render(request,'placementapp/createposition.html',{'form':form})    
+    redirect('/')    
+
+def UpdateOffer(request):
+    pass
+def DeleteOffer(request):
+    pass
+def ListPosition(request):
+    position=getallPosition(request)
+    return render(request, 'placementapp/position.html',{'dataset':position})
+
+def updatestudentstatus(request):
+    stu=Applied.objects.all()
+
+    return render(request,'placementapp/appliedStu.html',{'dataset':stu})

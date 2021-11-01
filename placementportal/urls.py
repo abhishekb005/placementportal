@@ -27,4 +27,11 @@ urlpatterns = [
     path('dashboard/',views.studentdashboard,name='dashboard'),
     path("login",views.userlogin,name="login"),
     path("logout",views.userlogout,name="logout"),
+    path('Position',views.ListPosition),
+    path('createposition',views.createPosition),
+    path('Position/update/<int:_id>',views.UpdatePosition),
+    path('Position/delete/<int:_id>',views.DeletePosition),
+    path('Applied',views.updatestudentstatus),
+    path('Offer/create',views.CreateOffer),
+    
 ]

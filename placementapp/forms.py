@@ -4,8 +4,7 @@ from django.forms import fields
 from django.forms import ModelForm
 from .models import *
 
-
-from .models import Student,Mentor,PlacementOfficer,Company,User
+#from .models import Student,Mentor,PlacementOfficer,Company,User
 from django.db import transaction
 from django.forms.utils import ValidationError
 
@@ -48,8 +47,6 @@ class Schooldetails(forms.Form):
     Location_Name=forms.CharField(max_length=40,)
     Board=forms.CharField(max_length=50,)
     
-
-
 class CollegeDetails(forms.Form):
     Degree_Name=forms.CharField(max_length=40)
     Degree_Duration=forms.IntegerField(min_value=2)
@@ -73,10 +70,35 @@ class SchoolForm(ModelForm):
 
 # Update Student Details based on Model
 class StudentForm(ModelForm):
-    
     class Meta:
         model=Student
         fields='__all__'
         exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12']
     
+class PositionForm(forms.ModelForm):
+    class Meta:
+        model=Position
+        fields=('Company','minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile')
 
+class StudentStatus(forms.ModelForm):
+    class Meta:
+        model=Applied
+        fields=['Status','FinalOffer']
+
+class OfferForm(forms.ModelForm):
+    class Meta:
+        model=Offers
+        fields='__all__'
+
+class MessageC2P(forms.ModelForm):
+    class Meta:
+        model=MessageC2P
+        fields='__all__'
+class MessageP2C(forms.ModelForms):
+    class Meta:
+        model=MessageP2C
+        fields='__all__'
+class MessageP2S(forms.ModelForm):
+    class Meta:
+        model=MessageP2S
+        fields='__all__'
