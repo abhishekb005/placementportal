@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student form</title>
+</head>
+<body>
+    {% for pos in Positions %}
+    
+{{pos}}
+<form action="{% url 'applypos' pos.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Apply for the position">
+</form>
+
+<hr>
+{% endfor %}
+</body>
+</html>
+{% endblock %}

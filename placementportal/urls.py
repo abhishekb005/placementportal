@@ -20,12 +20,12 @@ from placementapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('signup/',views.signup ),
+    path('signup/',views.signup ,name='usersignup'),
     path('studUpdate/',views.StudentUpdate,name="StudUpdate"),
-    url(r"^accounts/",include("django.contrib.auth.urls")),
+    #url(r"^accounts/",include("django.contrib.auth.urls")),
     #url(r"^dashboard/",views.studentdashboard,name="dashboard"),
     path('dashboard/',views.studentdashboard,name='dashboard'),
-    path("login",views.userlogin,name="login"),
+    path("login",views.userlogin,name="userlogin"),
     path("logout",views.userlogout,name="logout"),
     path('Position',views.ListPosition),
     path('createposition',views.createPosition),
@@ -33,5 +33,7 @@ urlpatterns = [
     path('Position/delete/<int:_id>',views.DeletePosition),
     path('Applied',views.updatestudentstatus),
     path('Offer/create',views.CreateOffer),
+    path('ApplyPosition',views.applyView),
+    path('apply/<int:id>/',views.applyForPosition,name="applypos"),
     
 ]

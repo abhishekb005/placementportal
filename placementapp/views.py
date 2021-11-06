@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404
+from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404,HttpResponseRedirect
 from .forms import *
 from django.contrib import messages
 from django.contrib.auth import login, authenticate,logout
@@ -47,16 +47,23 @@ def signup(request):
         else:
             form=StudentSignUpForm()
         return render(request,'placementapp/signup.html',{'form':form})
-
+def applyView(request):
+    position=Position.objects.all()
+    return render(request,'placementapp/PositionApply.html',{'Positions':position})
+    
 def applyForPosition(request,id):
     varuser=request.user
-    if varuser.is_authenticated and varuser.user_type==1:
+    if request.method=='POST' and varuser.is_authenticated and varuser.user_type==1 :
         Stu=Student.objects.get(user=varuser)
         pos=Position.objects.get(pk=id)
-        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.branch==Stu.Branch:
+        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile :
             Applied.objects.create(Position=pos,Student=Stu)
+            print(f'{Stu} {pos}')
+            return HttpResponseRedirect('/ApplyPosition')
         else:
-            print("")
+            print("Not Eligible for the Position")
+    else:
+        print(' Student not varified ')
 
 def StudentList(request):
     varuser=request.user

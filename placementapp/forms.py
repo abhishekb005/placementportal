@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.forms import fields
-from django.forms import ModelForm
+#from django.forms import fields
+#from django.forms import ModelForm
 from .models import *
 
 #from .models import Student,Mentor,PlacementOfficer,Company,User
@@ -63,13 +63,13 @@ class BackLogDetails(forms.Form):
     CurrentBacklog=forms.BooleanField()
     CurrentBacklog_subjectname=forms.CharField(max_length=50)
 
-class SchoolForm(ModelForm):
+class SchoolForm(forms.ModelForm):
     class Meta:
         model=School
         fields='__all__'
 
 # Update Student Details based on Model
-class StudentForm(ModelForm):
+class StudentForm(forms.ModelForm):
     class Meta:
         model=Student
         fields='__all__'
@@ -94,7 +94,7 @@ class MessageC2P(forms.ModelForm):
     class Meta:
         model=MessageC2P
         fields='__all__'
-class MessageP2C(forms.ModelForms):
+class MessageP2C(forms.ModelForm):
     class Meta:
         model=MessageP2C
         fields='__all__'
