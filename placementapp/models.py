@@ -33,18 +33,26 @@ class Degree(models.Model):
     Min_credit=models.IntegerField(null=True,blank=True,)
 
     def __str__(self):
-        return f"{self.Degree_Name} {self.Degree_Duration}"
+        return f"{self.Degree_Name}"
 
 class Branch(models.Model):
     #Branch_Code=models.CharField()
     Branch_Name=models.CharField(max_length=40,)
-    Degree=models.ManyToManyField(to=Degree)
-    Start_year=models.PositiveSmallIntegerField()
+    Degree=models.ManyToManyField(to=Degree,through='BranchDS')
+    
 
     def __str__(self):
         
-        return f"{self.Branch_Name} {self.Degree} {self.Start_year}"
+        return f"{self.Branch_Name}"
 
+class BranchDS(models.Model):
+    branch=models.ForeignKey(to=Branch,on_delete=models.CASCADE)
+    degree=models.ForeignKey(to=Degree,on_delete=models.CASCADE)
+    Start_year=models.PositiveSmallIntegerField()
+    
+    
+    def __str__(self):
+        return f"{self.branch} {self.degree} {self.Start_year}"
 # Abstract Model i.e it wont be created in database Table
 # Its Parent Class For Mentor and PlacementOfficer    
 class Staff(models.Model):
@@ -92,7 +100,7 @@ class Position(models.Model):
     minCTC=models.SmallIntegerField(verbose_name='Minimum CTC in Lakhs')
     maxCTC=models.SmallIntegerField(verbose_name='Maximum CTC in Lakhs')
     Description=models.TextField(verbose_name='Roles and Responsibility')
-    branch=models.ManyToManyField(to=Branch,)
+    branch=models.ManyToManyField(to=BranchDS,)
     minScore10=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
     minScore12=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
     minJeePercentile=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
@@ -117,7 +125,7 @@ class Student(models.Model):
     Score10=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     Score12=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     JeePercentile=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
-    Branch=models.ForeignKey(to=Branch,on_delete=models.SET_NULL,null=True)
+    Branch=models.ForeignKey(to=BranchDS,on_delete=models.SET_NULL,null=True)
     Aim=models.TextField(null=True,blank=True,)
     Objective=models.TextField(null=True,blank=True,)
     Mission=models.TextField(null=True,blank=True,)
@@ -180,7 +188,7 @@ class Applied(models.Model):
     Student=models.ForeignKey(to=Student,on_delete=models.CASCADE)
     Position=models.ForeignKey(to=Position,on_delete=models.CASCADE)
     Status=models.CharField(max_length=30,choices=Status_Choices,default='UnderEvaluation')
-    Time=models.DateTimeField(verbose_name='Next Round Exam Start Time',auto_now_add=True,)
+    Time=models.DateTimeField(verbose_name='applied at',auto_now_add=True,)
     Description=models.TextField(verbose_name='Info About Next Roumd',null=True,blank=True)
     FinalOffer=models.ForeignKey(to=Offers,on_delete=models.SET_NULL,null=True,blank=True)
 

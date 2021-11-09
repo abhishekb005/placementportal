@@ -13,9 +13,9 @@
 {% if user.is_authenticated %}
 
 Hello, {{ user.username|default:'Guest' }}!
-<a href="/studUpdate">Student Profile Update</a>
-<a href="/dashboard">Student Dashboard</a>
-<a href="/Position">Positions</a>
+<a href="/createposition">Add Position</a>
+<a href="/CompanyDashboard">Company Dashboard</a>
+<a href="/AppliedStudent">Views Students Applied</a>
 <a href="/Applied">Applied Position</a>
 <a href="/ApplyPosition">apply to Positions</a>
 {% endif %}

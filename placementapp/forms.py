@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.db.models import fields
 #from django.forms import fields
 #from django.forms import ModelForm
 from .models import *
-
+from django.forms import BaseModelFormSet
 #from .models import Student,Mentor,PlacementOfficer,Company,User
 from django.db import transaction
 from django.forms.utils import ValidationError
@@ -74,11 +75,28 @@ class StudentForm(forms.ModelForm):
         model=Student
         fields='__all__'
         exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12']
-    
+
+class CustomModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, branch):
+        """ Customises the labels for checkboxes"""
+        return "%s" % branch.Branch_Name
+
 class PositionForm(forms.ModelForm):
+    def __init__(self,*args, **kwargs):
+        """ Grants access to the request object so that only members of the current user
+        are given as options"""
+        #self.request = kwargs.pop('request')
+        
+        super(PositionForm, self).__init__(*args, **kwargs)
+        self.fields['branch'].queryset = BranchDS.objects.all()
+        
     class Meta:
         model=Position
-        fields=('Company','minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile')
+        fields=('minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile')
+    branch = forms.ModelMultipleChoiceField(
+        queryset=Branch.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
 
 class StudentStatus(forms.ModelForm):
     class Meta:
@@ -86,6 +104,14 @@ class StudentStatus(forms.ModelForm):
         fields=['Status','FinalOffer']
 
 class OfferForm(forms.ModelForm):
+    def __init__(self,user,*args, **kwargs):
+        """ Grants access to the request object so that only members of the current user
+        are given as options"""
+        #self.request = kwargs.pop('request')
+        
+        super(OfferForm, self).__init__(*args, **kwargs)
+        self.fields['Position'].queryset = Position.objects.filter(Company__user=user)
+    
     class Meta:
         model=Offers
         fields='__all__'
@@ -94,11 +120,28 @@ class MessageC2P(forms.ModelForm):
     class Meta:
         model=MessageC2P
         fields='__all__'
+
 class MessageP2C(forms.ModelForm):
     class Meta:
         model=MessageP2C
         fields='__all__'
+
 class MessageP2S(forms.ModelForm):
     class Meta:
         model=MessageP2S
         fields='__all__'
+
+class AppliedForm(forms.ModelForm):
+    class Meta:
+        model=Applied
+        fields="__all__"
+
+# class MyAppliedForm(AppliedForm):
+#     def __init__(self, *args, user, **kwargs):
+#          self.user = user
+#          super().__init__(*args, **kwargs)
+
+# class BaseAppliedFormSet(BaseModelFormSet):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.queryset = Applied.objects.filter(Status='Selected')

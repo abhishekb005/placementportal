@@ -33,7 +33,15 @@ urlpatterns = [
     path('Position/delete/<int:_id>',views.DeletePosition),
     path('Applied',views.updatestudentstatus),
     path('Offer/create',views.CreateOffer),
+    path('Offer/update/<int:id>/',views.UpdateOffer),
+    path('Offer/delete/<int:id>',views.DeleteOffer),
+    path('Offer',views.ListOffer),
     path('ApplyPosition',views.applyView),
     path('apply/<int:id>/',views.applyForPosition,name="applypos"),
+    path('assignoffer',views.AssignOffer),
+    path('Students',views.ListStudentCompany),
+    path('Students/<int:id>',views.StudentDetailView),
+    path('AssignMentor',views.AddStudentMentor),
+    path('verifyStu',views.VerifyStudentView),
     
 ]

@@ -3,7 +3,7 @@ from faker import Faker
 import random
 from django.utils import timezone
 import faker.providers
-from placementapp.models import Branch, Offers, PlacementCell, User,School,Degree,Mentor,Company,Position,Student,MessageP2S,Message,MessageP2C,MessageC2P,Applied
+from placementapp.models import Branch, BranchDS, Offers, PlacementCell, User,School,Degree,Mentor,Company,Position,Student,MessageP2S,Message,MessageP2C,MessageC2P,Applied
 class Command(BaseCommand):
     help="Command Info"
     def handle(self,*args,**kwargs):
@@ -25,6 +25,7 @@ class Command(BaseCommand):
         #     user.set_password(fpassword2)
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
+
         # for _ in range(5):
         #     fuser_type = 3
         #     fverified =random.choice([True,False])
@@ -35,7 +36,7 @@ class Command(BaseCommand):
         #     fpassword1="qwerty"
         #     fpassword2="qwerty"
         #     fmobile_no=Fake.phone_number()
-        #     user=User(user_type=fuser_type,verified=fverified,first_name=ffirst_name,last_name=flast_name,email=femail,username=ffirst_name)
+        #     user=User(user_type=fuser_type,verified=fverified,first_name=ffirst_name,email=femail,username=ffirst_name)
         #     user.set_password(fpassword2)
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
@@ -68,11 +69,11 @@ class Command(BaseCommand):
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
         # print('Printing createdata')
-        boards=['CBSE','ICSE','MP BOARD']
+        # boards=['CBSE','ICSE','MP BOARD']
         # for _ in range(5):
         # #user class
-        #     fschoolName=fake.name()
-        #     fLocation_Name=fake.city()
+        #     fschoolName=Fake.name()
+        #     fLocation_Name=Fake.city()
         #     fBoard=random.choice(boards)
         #     print(f"{fschoolName} {fLocation_Name} {fBoard}")
         #     School.objects.get_or_create(Name=fschoolName,Location_Name=fLocation_Name,Board=fBoard)
@@ -96,26 +97,39 @@ class Command(BaseCommand):
         #     Degree.objects.get_or_create(Degree_Name=fDegree_Name,Degree_Duration=fDegree_Duration,Total_Sem=fTotal_Sem,Min_credit=fMin_credit)
         # d=Degree.objects.all()
         # print(d)
+
         # branch=['CSE','IT','ECE','EE','AU']
-        # Year=[2015,2016,2017]
-        #branch class
+        # Year=[2017,2018,2019,2020,2021]
+        # #branch class
         # d=Degree.objects.all().count()
-        # for _ in range(10):
-        #     fBranch_Name=random.choice(branch)
-        #     dno=Fake.random_int(1, d)
-        #     fdegree=Degree.objects.get(pk=dno)
-        #     fStart_year=random.choice(Year)
-        #     print(f"{fBranch_Name} {fdegree.Degree_Name} {fStart_year}")
-        #     Branch.objects.get_or_create(Branch_Name=fBranch_Name,Start_year=fStart_year)
+        # b=Branch.objects.all().count()
+        # for x in branch:
+        #     fBranch_Name=x
+        #     #dno=Fake.random_int(1, d)
+        #     #fdegree=Degree.objects.get(pk=dno)
+        #     #fStart_year=random.choice(Year)
+        #     print(f"{fBranch_Name} ")
+        #     Branch.objects.get_or_create(Branch_Name=fBranch_Name)
         # bc=Branch.objects.all().count()
         # print(bc)
+
+
+        # for _ in range(10):
+        #     bno=Fake.random_int(1, b)
+        #     brh=Branch.objects.get(pk=bno)
+        #     dno=Fake.random_int(1, d)
+        #     deg=Degree.objects.get(pk=dno)
+        #     fStart_year=random.choice(Year)
+        #     brds=BranchDS.objects.get_or_create(branch=brh,degree=deg,Start_year=fStart_year)
+        #     print(brds)
+
 
         # varuser=User.objects.filter(user_type=4)
         # for utr in varuser:
         #     ffirst_name=utr.first_name
         #     flast_name=utr.last_name 
         #     femail=utr.email
-            
+
         #     fmobile_no=int(Fake.numerify(text='%#########'))
         #     Mentor.objects.get_or_create(user=utr,first_name=ffirst_name,last_name=flast_name,Mobile_No=fmobile_no)
         #     print(f"{ffirst_name} {utr.verified} {femail}")
@@ -138,7 +152,7 @@ class Command(BaseCommand):
         #     print(f"{ffirst_name} {utr.verified} ")
         
         # comp=Company.objects.all()
-        # bcount=Branch.objects.all().count()
+        # bcount=BranchDS.objects.all().count()
         # for company in comp:
         #     fminCTC=int(Fake.numerify(text='#%'))
         #     fmaxCTC=fminCTC+2
@@ -147,10 +161,12 @@ class Command(BaseCommand):
         #     fminScore12=60
         #     fminJeePercentile=10
         #     id=Fake.random_int(1, bcount)
-        #     b1=Branch.objects.get(pk=id)
+        #     b1=BranchDS.objects.get(pk=id)
         #     id=Fake.random_int(1, bcount)
-        #     b2=Branch.objects.get(pk=id)
-        #     Pos1=Position.objects.get_or_create(Company=company,minJeePercentile=fminJeePercentile,minScore10=fminScore10,minScore12=fminScore12,minCTC=fminCTC,maxCTC=fmaxCTC,Description=fDescription,)
+        #     b2=BranchDS.objects.get(pk=id)
+        #     #print(b1)
+        #     #print(b2)
+        #     Pos1=Position.objects.create(Company=company,minJeePercentile=fminJeePercentile,minScore10=fminScore10,minScore12=fminScore12,minCTC=fminCTC,maxCTC=fmaxCTC,Description=fDescription,)
         #     print(Pos1)
         #     Pos1.branch.add(b1)
         #     Pos1.branch.add(b2)
@@ -166,7 +182,7 @@ class Command(BaseCommand):
         # varuser=User.objects.filter(user_type=1)
         # Gender_choice=['MALE','FEMALE','OTHERS']
         # SchoolCount=School.objects.all().count()
-        # BranchCount=Branch.objects.all().count()
+        # BranchCount=BranchDS.objects.all().count()
         # print('check1')
         # for urs in varuser:
         #     fenrollment_no=urs.username
@@ -186,7 +202,7 @@ class Command(BaseCommand):
         #     fJeePercentile=80.65
         #     print('check4')
         #     bno=Fake.random_int(1,BranchCount)
-        #     fBranch=Branch.objects.get(pk=bno)
+        #     fBranch=BranchDS.objects.get(pk=bno)
         #     fAim=Fake.paragraph(nb_sentences=3)
         #     fObjective=Fake.paragraph(nb_sentences=3)
         #     fMission=Fake.paragraph(nb_sentences=3)
@@ -252,31 +268,31 @@ class Command(BaseCommand):
         # print(msg2p)
         
         #Offers
-        # Pos=Position.objects.get(pk=1)
-        # desc=Fake.paragraph(nb_sentences=3)
-        # fctc=Pos.minCTC+1
-        # print(f"{Pos} {desc} {fctc}")
-        # o1=Offers.objects.create(Position=Pos,
-        # Description=desc,
-        # FinalCTC=fctc,)
-        # print(o1)
+        # comp=Company.objects.all()
+        # for company in comp:
+        #     for Pos in Position.objects.filter(Company=company):
+        #         #Pos=Position.objects.get(pk=1)
+        #         desc=Fake.paragraph(nb_sentences=3)
+        #         fctc=Pos.minCTC+1
+        #         print(f"{Pos} {desc} {fctc}")
+        #         o1=Offers.objects.create(Position=Pos,
+        #         Description=desc,
+        #         FinalCTC=fctc,)
+        #         print(o1)
 
         # #Applied
         # Status_Choices=[('S','Selected'),('ENR','EligibleForNextRound'),('R','Rejected'),('UE','UnderEvaluation'),]
-        # Stu=Student.objects.all()
-        # print(Stu)
-        # Stu=Stu[0]
-        # print(Stu)
-        # Pos=Position.objects.all()
-        # print(Pos)
-        # Pos=Pos[0]
-        # print(Pos)
-        # status=random.choice(Status_Choices)
-        # print(status)
+        # for Stu in Student.objects.all():
+        #     print(Stu)
+        #     for Pos in Position.objects.all():
+        #         print(Pos)
+        #         status=random.choice(Status_Choices)
+        #         print(status)
         # #o1=Offers.objects.get(pk=1)
-        # desc=Fake.paragraph(nb_sentences=3)
-        # a1=Applied.objects.create(Student=Stu,Position=Pos,Description=desc,)
-        # print(a1)
+        #         desc=Fake.paragraph(nb_sentences=3)
+        #         a1=Applied.objects.create(Student=Stu,Position=Pos,Description=desc,)
+        #         print(a1)
+        
         # #mentor
         # m=Mentor.objects.get(pk=1)
         # Stu=Student.objects.all()
