@@ -93,7 +93,7 @@ class Company(models.Model):
     revenue=models.BigIntegerField(verbose_name='Latest 1 year Revenue')
     
     def __str__(self):
-        return f"{self.user.username} {self.Name}"
+        return f"{self.Name}"
 
 class Position(models.Model):
     Company=models.ForeignKey(to=Company,on_delete=models.CASCADE)
@@ -106,7 +106,7 @@ class Position(models.Model):
     minJeePercentile=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
 
     def __str__(self):
-        return f"{self.Company} {self.Description} "
+        return f"{self.Company}"
 
 class Student(models.Model):
     user=models.OneToOneField(to=User,on_delete=models.CASCADE,primary_key=True)

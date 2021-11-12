@@ -11,13 +11,39 @@
 {% extends 'base.html' %}
 {% block content %}
 {% if user.is_authenticated %}
+{% if user.user_type == 1 %}
 
-Hello, {{ user.username|default:'Guest' }}!
-<a href="/studUpdate">Student Profile Update</a>
-<a href="/dashboard">Student Dashboard</a>
-<a href="/Position">Positions</a>
-<a href="/Applied">Applied Position</a>
-<a href="/ApplyPosition">apply to Positions</a>
+Hello Student, {{ user.username|default:'Guest' }}!
+<br>
+<a href="/UpdateProfile">Student Profile Update</a>
+<br>
+<a href="/Dashboard">Student Dashboard</a>
+<br>
+<a href="/AppliedPosition">Applied Positions With Status</a>
+<br>
+<a href="/ApplyPosition">Apply to Positions</a>
+<br>
+<a href="/Offers">View Offers</a>
+<br>
+<a href="/Dashboard">Messages from Placement Cell</a>
+<br>
+{% endif %}
+{% if user.user_type == 4 %}
+
+Hello Mentor, {{ user.username|default:'Guest' }}!
+
+<br>
+<a href="/Dashboard">Dashboard</a>
+<br>
+<a href="/AssignMentor">Add Students /Assign Student , to you</a>
+<br>
+<a href="/StudentList">View List Of Students With Button to Detailed View</a>
+<br>
+<a href="/Dashboard">Export Students Data as CSV</a>
+<br>
+<a href="/verifyStu">Verify Students</a>
+<br>
+{% endif %}
 {% endif %}
 {% endblock %}
 <body>

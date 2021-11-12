@@ -20,28 +20,45 @@ from placementapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('signup/',views.signup ,name='usersignup'),
-    path('studUpdate/',views.StudentUpdate,name="StudUpdate"),
-    #url(r"^accounts/",include("django.contrib.auth.urls")),
-    #url(r"^dashboard/",views.studentdashboard,name="dashboard"),
-    path('dashboard/',views.studentdashboard,name='dashboard'),
+    # Student Sign-Up Page
+    path('stusignup/',views.Stusignup ,name='usersignup'),
+    # Placement Officer Sign-Up Page
+    path('ploffsignup',views.PlacementOfficerSignUp),
+    # Mentor Sign-Up Page
+    path('mentorsignup',views.MentorSignUp),
+    # Company Sign-Up Page
+    path('companysignup',views.CompanySignUp),
+
     path("login",views.userlogin,name="userlogin"),
     path("logout",views.userlogout,name="logout"),
-    path('Position',views.ListPosition),
-    path('createposition',views.createPosition),
+    # Update Student Profile Form 
+    path('UpdateProfile/',views.StudentUpdateProfile,name="UpdateProfile"),
+    #Student Dashboard
+    path('Dashboard/',views.dashboard,name='Dashboard'),
+    #For Students return all the available positions
+    #For Campany return Position Associated with the company
+    #For PlacementOffi return all positions 
+    path('Position',views.ListPositionView),
+    #path('Positions/Company/<int:id>',views.),
+    path('Position/create',views.createPosition),
     path('Position/update/<int:_id>',views.UpdatePosition),
     path('Position/delete/<int:_id>',views.DeletePosition),
-    path('Applied',views.updatestudentstatus),
+
+    path('AppliedPosition',views.ListOfAppliedPositions),
+
+    path("Offers",views.OfferStudentView),
+    path('Offer',views.ListOffer),
     path('Offer/create',views.CreateOffer),
     path('Offer/update/<int:id>/',views.UpdateOffer),
     path('Offer/delete/<int:id>',views.DeleteOffer),
-    path('Offer',views.ListOffer),
+    
     path('ApplyPosition',views.applyView),
     path('apply/<int:id>/',views.applyForPosition,name="applypos"),
+
     path('assignoffer',views.AssignOffer),
-    path('Students',views.ListStudentCompany),
-    path('Students/<int:id>',views.StudentDetailView),
+    path('Students',views.ListOfStudentCompany),
+    path('Students/<int:id>',views.StudentDetailView,name='StuDetail'),
     path('AssignMentor',views.AddStudentMentor),
     path('verifyStu',views.VerifyStudentView),
-    
+    path('StudentList',views.ListStudentView),
 ]

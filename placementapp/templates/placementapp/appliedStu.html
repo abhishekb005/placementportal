@@ -10,14 +10,23 @@
 </head>
 <body>
     {% for data in dataset %}
-{{data}}
-<form method="post">
-    {% csrf_token %}
-    {{form}}
-    <input type = "Submit" value="Post">
-    <a href='/'>Cancel</a>
-</form>
-<hr>
+<dl>  
+    <dt>Position</dt>  
+    <dd>{{data.Position}}</dd>  
+    <dt>Time</dt>  
+    <dd>{{data.Time}}</dd>  
+   <dt>Status</dt>  
+   <dd>{{data.Status}}</dd>  
+    <dt>Final Offer</dt>  
+    <dd>{{data.FinalOffer}}</dd>
+    <dt>Branchs</dt> 
+  </dl> 
+  {% for branchds in data.Position.branch.all %}
+
+{{branchds}}
+<br>
+{% endfor %}
+<br><hr>
 {% endfor %}
 </body>
 </html>

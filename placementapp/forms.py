@@ -26,6 +26,44 @@ class StudentSignUpForm(UserCreationForm):
         #student.Email=*self.cleaned_data.get('email')
         return user
 
+class PlacementOfficerSignUpForm(UserCreationForm):
+    mobile_no=forms.IntegerField(max_value=9999999999,min_value=1111111111)
+    password2=forms.CharField(widget=forms.PasswordInput)
+    #PlacementCell=forms.ChoiceField(required=True,)
+    class Meta:
+        model = User
+        fields = ( 'username', 'email', 'password1' ,'password2', 'mobile_no',)
+        #label={'email':'Email addr'}
+
+    @transaction.atomic
+    def save(self):
+        user = super().save(commit=False)
+        user.user_type=2
+        user.verified=True
+        user.save()
+        pc=PlacementCell.objects.get(pk=1)
+        mentorr = PlacementOfficer.objects.create(user=user,placementCell=pc,first_name=self.cleaned_data['first_name'],Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
+        #student.Email=*self.cleaned_data.get('email')
+        return user 
+        
+class MentorSignUpForm(UserCreationForm):
+    mobile_no=forms.IntegerField(max_value=9999999999,min_value=1111111111)
+    password2=forms.CharField(widget=forms.PasswordInput)
+    class Meta:
+        model = User
+        fields = ( 'username', 'email', 'password1' ,'password2', 'mobile_no')
+        #label={'email':'Email addr'}
+
+    @transaction.atomic
+    def save(self):
+        user = super().save(commit=False)
+        user.user_type=4
+        user.verified=True
+        user.save()
+        mentorr = Mentor.objects.create(user=user,first_name=self.cleaned_data['first_name'],Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
+        #student.Email=*self.cleaned_data.get('email')
+        return user 
+
 class CompanySignUpForm(UserCreationForm):
     mobile_no=forms.IntegerField(max_value=9999999999,min_value=1111111111)
     password2=forms.CharField(widget=forms.PasswordInput)
@@ -145,3 +183,8 @@ class AppliedForm(forms.ModelForm):
 #     def __init__(self, *args, **kwargs):
 #         super().__init__(*args, **kwargs)
 #         self.queryset = Applied.objects.filter(Status='Selected')
+class StudentVerifyForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['username','verified']
+    username=forms.CharField(disabled=True,)
