@@ -53,7 +53,7 @@ def signup(request):
         return render(request,'placementapp/signup.html',{'form':form})
 
 def Stusignup(request):
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and request.user.user_type!=2:
         return redirect("/dashboard")
     else:
         if request.method=='POST':
@@ -64,8 +64,8 @@ def Stusignup(request):
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=StudentSignUpForm()
-        return render(request,'placementapp/signup.html',{'form':form})
-
+        return render(request,'placementapp/Student/signup.html',{'form':form})
+    
 def CompanySignUp(request):
     if request.user.user_type==2 and request.user.verified:
         if request.method=='POST':
@@ -76,7 +76,8 @@ def CompanySignUp(request):
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=CompanySignUpForm()
-        return render(request,'placementapp/signup.html',{'form':form})
+        return render(request,'placementapp/Company/signup.html',{'form':form})
+    return HttpResponse('<h1> Current User is not Authorised </h1>')
 
 def MentorSignUp(request):
     if request.user.user_type==2 and request.user.verified:
@@ -88,7 +89,8 @@ def MentorSignUp(request):
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=MentorSignUpForm()
-        return render(request,'placementapp/signup.html',{'form':form})
+        return render(request,'placementapp/Mentor/signup.html',{'form':form})
+    return HttpResponse('<h1> Current User is not Authorised </h1>')
 
 def PlacementOfficerSignUp(request):
     if request.user.user_type==2 and request.user.verified:
@@ -118,7 +120,7 @@ def applyView(request):
         for applied in alreadyApplied:
             alreadyAppliedPositions.append(applied.Position.id)
         position=Position.objects.filter(branch=Stu.Branch).exclude(id__in=alreadyAppliedPositions)
-        return render(request,'placementapp/PositionApply.html',{'Positions':position})
+        return render(request,'placementapp/Student/PositionApply.html',{'Positions':position})
     return HttpResponse('<h1> Current User is not A Student or  verified </h1>')
 
 def applyForPosition(request,id):
@@ -148,12 +150,6 @@ def StudentList(request):
         Stu=Student.objects.all().order_by('Branch')
         return Stu
 
-def VerifyStudent(request):
-    varuser=request.user
-    Stu=None
-    if varuser.user_type==4:
-        Stu=Student.objects.filter(mentor__user=varuser)
-    return Stu
 
 def StudentUpdateProfile(request):
     if request.user.is_authenticated:
@@ -165,28 +161,15 @@ def StudentUpdateProfile(request):
                     form.save()
             else:
                 form=StudentForm(instance=stu)
-            return render(request,'placementapp/testform.html',{'form':form})
+            return render(request,'placementapp/Student/UpdateProfile.html',{'form':form})
         else:
             return HttpResponse('<h1> Current User is not of A Student </h1>')
     else:
         return HttpResponse('<h1> Current Session User Not Authenticated </h1>') 
+
 def dashboard(request):
     return render(request,'placementapp/dashboard.html')
 
-def getallOffers(request):
-    if request.user.is_authenticated and request.user.verified:
-        if request.user.user_type==1:
-            Stu=Student.objects.get(user=request.user)
-            offers=Offers.objects.filter(Student=Stu).order_by('FinalCTC')
-        if request.user.user_type==3:
-            comp=Company.objects.get(user=request.user)
-            #positions=Position.objects.filter(Company=comp)
-            offers=Offers.objects.filter(Position__Company=comp)
-        else:
-            offers=None
-    else:
-        offers=None
-    return offers
 
 def getMsg2S(request):
     varuser=request.user
@@ -221,21 +204,25 @@ def getMsg2P(request):
     if varuser.is_authenticated and varuser.user_type==2 and varuser.verified:
         msg=MessageC2P.objects.all().order_by('TimeStamps')
     return msg
-def getStudentApplied(request):
+def ListOfPositionsApplied(request):
     varuser=request.user
     applied=None
     if varuser.is_authenticated and varuser.verified :
         if varuser.user_type==3:
             comp=Company.objects.get(user=varuser)
             applied=Applied.objects.filter(Position__Company=comp)
-            return applied
-        elif varuser.user_type==1:
+            return render(request,'placementapp/Company/ListAppliedStuForPos.html',{'dataset':applied})
+
+        if varuser.user_type==1:
             stu=Student.objects.get(user=varuser)
             applied=Applied.objects.filter(Student=stu)
+            return render(request,'placementapp/Student/ListOfPositionsApplied.html',{'dataset':applied})
+
         elif varuser.user_type==2:
             applied=Applied.objects.all().order_by('Time')
-        return applied
-    return applied
+        return render(request,'placementapp/PlacementOff/ListOfApplied.html',{'dataset':applied})
+
+    return HttpResponse('<h1> Session User not a verified User </h1>')
 
 def OfferStudentView(request):
     varuser=request.user
@@ -245,15 +232,21 @@ def OfferStudentView(request):
             return HttpResponse('<h1>No Offers </h1>')
         return render(request,'placementapp/Offers.html',{'dataset':applied})
     return HttpResponse('<h1> Session User not a verified Student </h1>')
+def ListOfAppliedStuForPos(request,id):
+    varuser=request.user
+    appliedStu=None
+    if varuser.is_authenticated and varuser.verified:
+        if varuser.user_type==3:
+            appliedStu=Applied.objects.filter(Position__id=id)
+            return render(request,'placementapp/Company/ListAppliedStuForPos.html',{'dataset':appliedStu})
+# def ListOfStudentCompany(request):
+#     applied=getStudentApplied(request)
+#     return render(request,'placementapp/position.html',{'dataset':applied})
 
-def ListOfStudentCompany(request):
-    applied=getStudentApplied(request)
-    return render(request,'placementapp/position.html',{'dataset':applied})
-
-def ListOfAppliedPositions(request):
-    applied=getStudentApplied(request)
+# def ListOfAppliedPositions(request):
+#     applied=getStudentApplied(request)
     
-    return render(request,'placementapp/appliedStu.html',{'dataset':applied})
+#     return render(request,'placementapp/appliedStu.html',{'dataset':applied})
 
 #Update status of Students who are eligible for next round
 # Create New Offer for Particular Position -Create A form then save
@@ -267,52 +260,57 @@ def deleteOffer(request,id):
 #Update or assign Offer to those Student who applied for the position and got selected
 #NEw
 
-def StudentDetail(request,id):
-    varuser=request.user
-    if varuser.user_type==4:
-        StuUser=User.objects.get(pk=id)
-        mentorr=Mentor.objects.get(user=varuser)
-        Stu=None
-        if StuUser.user_type==1:
-            Stu=Student.objects.get(user=StuUser,mentor=mentorr)
-        
-        if Stu is None:
-            return None
-        else:
-            return Stu
-    if varuser.user_type==2:
-        StuUser=User.objects.get(pk=id)
-        
-        Stu=None
-        if StuUser.user_type==1:
-            Stu=Student.objects.get(user=StuUser)
-        
-        if Stu is None:
-            return None
-        else:
-            return Stu
-    if varuser.user_type==3:
-        StuUser=User.objects.get(pk=id)
-        Stu=None
-        applied=None
-        if StuUser.user_type==1:
-            Stu=Student.objects.get(user=StuUser)
-            comp=Company.objects.get(user=varuser)
-            applied=Applied.objects.filter(Student=Stu,Position__Company=comp)
-        if applied is not None:
-            return Stu
-        return None
-    return None
-
 def StudentDetailView(request,id):
-    Stu=StudentDetail(request,id)
-    return render(request,'placementapp/StudentDetail.html',{'dataset': Stu})
+    varuser=request.user
+    if varuser.verified and varuser.is_authenticated:
+        if varuser.user_type==4:
+            StuUser=User.objects.get(pk=id)
+            mentorr=Mentor.objects.get(user=varuser)
+            Stu=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser,mentor=mentorr)
+            
+            if Stu is not None:
+                return render(request,'placementapp/Mentor/StudentDetail.html',{'dataset': Stu})
+            else:
+                return HttpResponse('<h1>This Student Mentor is different from current  </h1>')
+        if varuser.user_type==2:
+            StuUser=User.objects.get(pk=id)
+            Stu=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser)
+            if Stu is None:
+                return HttpResponse('<h1>This Student Mentor is different from current  </h1>')
+
+            else:
+                return render(request,'placementapp/PlacementOff/StudentDetail.html',{'dataset': Stu})
+            
+        if varuser.user_type==3:
+            StuUser=User.objects.get(pk=id)
+            Stu=None
+            applied=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser)
+                comp=Company.objects.get(user=varuser)
+                applied=Applied.objects.filter(Student=Stu,Position__Company=comp)
+            if applied is not None:
+                return render(request,'placementapp/Company/StudentDetail.html',{'dataset': Stu})
+            return HttpResponse('<h1>Student Did Not Apply for This Compny , So Detail View Not Available  </h1>')
+    return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
 
 def ListStudentView(request):
     varuser=request.user
     if varuser.is_authenticated and varuser.verified and varuser.user_type==4:
-        Stu=StudentList(request)
-        return render(request, 'placementapp/ListStudent.html',{'dataset':Stu})
+        mentr=Mentor.objects.get(user=varuser)
+        Stu=Student.objects.filter(mentor=mentr)
+        return render(request, 'placementapp/Mentor/ListStudent.html',{'dataset':Stu})
+
+    if varuser.is_authenticated and varuser.verified and varuser.user_type==2:
+        Stu=Student.objects.all()
+        return render(request, 'placementapp/PlacementOff/ListStudent.html',{'dataset':Stu})
+    return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
+
+    
 
 def createPosition(request):
     if request.method=='POST' and request.user.user_type==3 :
@@ -322,10 +320,9 @@ def createPosition(request):
             pos=form.save(commit=False)
             pos.Company=comp
             pos.save()
-            return redirect('/dashboard')
-    else:
-        form=PositionForm()
-        return render(request,'placementapp/createposition.html',{'form':form})
+            
+    form=PositionForm()
+    return render(request,'placementapp/Company/createposition.html',{'form':form})
     return render(request,'placementapp/createposition.html',{'form':form})
     
 def UpdatePosition(request,_id):
@@ -344,7 +341,7 @@ def UpdatePosition(request,_id):
         context ={
             'form':form
         }
-        return render(request,'placementapp/createposition.html',context)
+        return render(request,'placementapp/Company/updateposition.html',context)
 
 def DeletePosition(request,_id):
     try:
@@ -356,7 +353,7 @@ def DeletePosition(request,_id):
         data.delete()
         return redirect('/')
     else:
-        return render(request, 'placementapp/deleteposition.html')
+        return render(request, 'placementapp/Company/deleteposition.html')
 
 def CreateOffer(request):
     if request.user.user_type==3 or request.user.user_type==2 and request.user.verified:
@@ -368,112 +365,133 @@ def CreateOffer(request):
                 return redirect('/')
         else:
             form=OfferForm(request.user)
-            return render(request,'placementapp/createposition.html',{'form':form})    
+            return render(request,'placementapp/Company/CreateOffer.html',{'form':form})    
     return redirect('/')    
 
 def UpdateOffer(request,id):
-    try:
-        old_data = get_object_or_404(Offers,id =id)
-        Pos=old_data.Position
-        if Pos.Company.user==request.user:
-            print("Correct User")
-        else:
-            old_data=None
-    except Exception:
-        raise Http404('Does Not Exist')
- 
-    if request.method =='POST':
-        form =OfferForm(request.user,request.POST, instance =old_data)
-        if form.is_valid():
-            form.save()
-            return redirect(f'/Offer/update/{id}')
-    else:
-        form = OfferForm(request.user,instance = old_data)
-        context ={
-            'form':form
-        }
-        return render(request,'placementapp/createposition.html',context)
+    if request.user.is_authenticated and request.user.verified  or request.user.user_type==2:
+        if request.user.user_type==3:
+    
+            try:
+                old_data = get_object_or_404(Offers,id =id)
+                Pos=old_data.Position
+                if Pos.Company.user==request.user:
+                    print("Correct User")
+                else:
+                    old_data=None
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method =='POST':
+                form =OfferForm(request.user,request.POST, instance =old_data)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Offer/update/{id}')
+            else:
+                form = OfferForm(request.user,instance = old_data)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/Company/updateOffer.html',context)
 
 def DeleteOffer(request,id):
-    try:
-        data = get_object_or_404(Offers,id=id)
-        Pos=data.Position
-        if Pos.Company.user==request.user:
-            print("Correct User")
-        else:
-            data=None
-    except Exception:
-        raise Http404('Does Not Exist')
- 
-    if request.method == 'POST':
-        data.delete()
-        return redirect('/')
-    else:
-        return render(request, 'placementapp/deleteposition.html')
+    if request.user.is_authenticated and request.user.verified  or request.user.user_type==2:
+        if request.user.user_type==3:
+            try:
+                data = get_object_or_404(Offers,id=id)
+                Pos=data.Position
+                if Pos.Company.user==request.user:
+                    print("Correct User")
+                else:
+                    data=None
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method == 'POST':
+                data.delete()
+                return redirect('/')
+            else:
+                return render(request, 'placementapp/Company/deleteOffer.html')
+        elif request.user.user_type==2:
+            try:
+                data = get_object_or_404(Offers,id=id)
+                Pos=data.Position
+                
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method == 'POST':
+                data.delete()
+                return redirect('/')
+            else:
+                return render(request, 'placementapp/PlacementOff/deleteOffer.html')
 
 def ListOffer(request):
-    offer=getallOffers(request)
-    return render(request,'placementapp/position.html',{'dataset':offer})
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==1:
+            Stu=Student.objects.get(user=request.user)
+            offers=Offers.objects.filter(Student=Stu).order_by('FinalCTC')
+            return render(request,'placementapp/Student/Offers.html',{'dataset':offers})
+        
+        if request.user.user_type==3:
+            comp=Company.objects.get(user=request.user)
+            #positions=Position.objects.filter(Company=comp)
+            offers=Offers.objects.filter(Position__Company=comp)
+            return render(request,'placementapp/Company/Offers.html',{'dataset':offers})
+        
+        if request.user.user_type==4:
+            offers=Offers.objects.all()
+            return render(request,'placementapp/PlacementOff/Offers.html',{'dataset':offers})    
+    return HttpResponse('<h1>Not Authorised</h1>')
 
-def getallPosition(request):
-    if request.user.user_type==1:
-        Stu=Student.objects.get(user=request.user)
-        if(request.user.verified):
-            positions=Position.objects.filter(branch=Stu.Branch)
-        else:
-            positions=None
-    elif request.user.user_type==3:
-        Comp=Company.objects.get(user=request.user)
-        positions=Position.objects.filter(Company=Comp)
-    elif  request.user.user_type==2:
-        positions=Position.objects.all().order_by('branch__Start_year')
-    else:
-        positions=None
-    return positions
 
 def ListPositionView(request):
     if request.user.user_type==2 and request.user.is_authenticated and request.user.verified:
         return HttpResponse('<h1> Mentor: No Company Position </h1>')
-    elif request.user.is_authenticated and request.user.verified:
-        position=getallPosition(request)
-        return render(request, 'placementapp/position.html',{'dataset':position}) 
+    elif request.user.is_authenticated and request.user.verified and request.user.user_type==3:
+        Comp=Company.objects.get(user=request.user)
+        positions=Position.objects.filter(Company=Comp)
+        return render(request, 'placementapp/Company/ListPositions.html',{'dataset':positions}) 
+    elif request.user.is_authenticated and request.user.verified and request.user.user_type==1:
+        Stu=Student.objects.get(user=request.user)
+        positions=Position.objects.filter(branch=Stu.Branch)
+        return render(request, 'placementapp/Student/ListPositions.html',{'dataset':positions}) 
     else:
         return HttpResponse('<h1> Current Session User might not be Authenticated or verified by the PlacementCell or Mentor</h1>') 
         
-def updatestudentstatus(request):
-    pass
-
-
 
 def AssignOffer(request):
-    comp=Company.objects.get(user=request.user)
-    AppliedForm=modelformset_factory(
-        Applied,
-        exclude=("Description",),
-        #formset=BaseAppliedFormSet,
-        #form=MyAppliedForm,
-    )
-    if request.method=='POST':
-        formset=AppliedForm(
-        request.POST,
-        queryset=Applied.objects.filter(Position__Company=comp),
-        #form_kwargs={'user': request.user},
-        user=request.user,
-        )
-        if formset.is_valid():
-            v=formset.save()
-    if request.method=='GET':
-        formset=AppliedForm(
-            queryset=Applied.objects.filter(Position__Company=comp)
-          #form_kwargs={'user': request.user},
-          #user=request.user,
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==3:
+    
+            comp=Company.objects.get(user=request.user)
+            AppliedForm=modelformset_factory(
+                Applied,
+                exclude=("Description",),
+                #formset=BaseAppliedFormSet,
+                #form=MyAppliedForm,
             )
-    for form in formset:
-        form.fields['Position'].queryset=Position.objects.filter(Company=comp)
-        form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
-        form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
-    return render(request,'placementapp/assignOffer.html',{'formset':formset})
-
+            if request.method=='POST':
+                formset=AppliedForm(
+                request.POST,
+                queryset=Applied.objects.filter(Position__Company=comp,Status='Selected'),
+                #form_kwargs={'user': request.user},
+                #user=request.user,
+                )
+                if formset.is_valid():
+                    v=formset.save()
+            if request.method=='GET':
+                formset=AppliedForm(
+                    queryset=Applied.objects.filter(Position__Company=comp,Status='Selected')
+                #form_kwargs={'user': request.user},
+                #user=request.user,
+                    )
+            for form in formset:
+                form.fields['Position'].queryset=Position.objects.filter(Company=comp)
+                form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
+                form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
+            return render(request,'placementapp/Company/assignOffer.html',{'formset':formset})
+    return HttpResponse('<h1> Current Session User might not be Authenticated or verified by the PlacementCell or Mentor</h1>') 
 
 def AddStudentMentor(request):
     varuser=request.user
@@ -486,6 +504,7 @@ def AddStudentMentor(request):
             fields=['enrollment_no',],
             extra=20,
             max_num=22,
+            can_delete=True,
         #formset=BaseAppliedFormSet,
         #form=MyAppliedForm,
         )
@@ -499,7 +518,10 @@ def AddStudentMentor(request):
             if formset.is_valid():
                 #print(formset)
                 v=formset.save(commit=False)
-                for obj in v:
+                for obj in formset.deleted_objects:
+                    obj.mentor=None
+                    obj.save()
+                for obj in formset.new_objects:
                     StuUser=User.objects.get(username=obj.enrollment_no)
                     if StuUser is not None:
                         Stu=Student.objects.get(enrollment_no=obj.enrollment_no)
@@ -513,17 +535,50 @@ def AddStudentMentor(request):
                     else:
                         print("Not Correct UserName")
                     
-        elif request.method=='GET':
-            formset=StudentMentorForm(
-                queryset=Student.objects.filter(mentor__user=varuser),
+        
+        formset=StudentMentorForm(
+            queryset=Student.objects.filter(mentor__user=varuser),
+            #form_kwargs={'user': request.user},
+            #user=request.user,
+            )
+    # for form in formset:
+    #     form.fields['Position'].queryset=Position.objects.filter(Company=comp)
+    #     form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
+    #     form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
+    return render(request,'placementapp/PlacementOff/assignMentor.html',{'formset':formset})
+
+def UpdateAppliedStuStatus(request):
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==3:
+            comp=Company.objects.get(user=request.user)
+            AppliedForm=modelformset_factory(
+                Applied,
+                #fields="__all__",
+                exclude=("FinalOffer","Time",),
+                #formset=BaseAppliedFormSet,
+                extra=0,
+                #form=UpdateAppliedStuStatusForm,
+            )
+            if request.method=='POST':
+                formset=AppliedForm(
+                request.POST,
+                queryset=Applied.objects.filter(Position__Company=comp).exclude(Status="Rejected"),
                 #form_kwargs={'user': request.user},
                 #user=request.user,
                 )
-        # for form in formset:
-        #     form.fields['Position'].queryset=Position.objects.filter(Company=comp)
-        #     form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
-        #     form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
-    return render(request,'placementapp/assignOffer.html',{'formset':formset})
+                if formset.is_valid():
+                    v=formset.save()
+            
+            formset=AppliedForm(
+                queryset=Applied.objects.filter(Position__Company=comp).exclude(Status="Rejected")
+                )
+            for form in formset:
+                form.fields['Position'].queryset=Position.objects.filter(Company=comp)
+                form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
+                #form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
+
+            return render(request,'placementapp/Company/assignOffer.html',{'formset':formset})
+    return HttpResponse('<h1> Current Session User might not be Authenticated or verified by the PlacementCell or Mentor</h1>') 
 
 def VerifyStudentView(request):
     varuser=request.user
@@ -562,16 +617,16 @@ def VerifyStudentView(request):
                     #Stu.save()
                     #print(Stu)
                 
-        elif request.method=='GET':
-            formset=StudentMentorForm(
-                queryset=User.objects.filter(id__in=userr),
-                #form_kwargs={'user': request.user},
-                #user=request.user,
-                )
-        # for form in formset:
-        #     form.fields['Position'].queryset=Position.objects.filter(Company=comp)
-        #     form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
-        #     form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
-    return render(request,'placementapp/assignOffer.html',{'formset':formset})
-
+        
+        formset=StudentMentorForm(
+            queryset=User.objects.filter(id__in=userr),
+            #form_kwargs={'user': request.user},
+            #user=request.user,
+            )
+    # for form in formset:
+    #     form.fields['Position'].queryset=Position.objects.filter(Company=comp)
+    #     form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
+    #     form.fields['FinalOffer'].queryset=Offers.objects.filter(Position__Company=comp)
+        return render(request,'placementapp/VerifyStudent.html',{'formset':formset})
+    return HttpResponse("<h1> Not Authorised</h1>")
 

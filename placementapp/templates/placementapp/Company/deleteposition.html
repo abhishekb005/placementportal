@@ -6,17 +6,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student form</title>
+    <title> form</title>
 </head>
 <body>
-    {% for data in dataset %}
-{{data}}
-{{data.Mobile_No}}
-{{data.user}}
-{{data.user.id}}
-<a href="{% url 'StuDetail' data.user.id  %}">Detail</a>
-<hr>
-{% endfor %}
+    <form method="post">
+    {% csrf_token %}
+    Click YES to confirm
+    <input type = "submit" value="YES">
+    <a href='/dashboard/'>Cancel</a>
+</form>
 </body>
 </html>
 {% endblock %}

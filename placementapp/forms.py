@@ -102,6 +102,9 @@ class BackLogDetails(forms.Form):
     CurrentBacklog=forms.BooleanField()
     CurrentBacklog_subjectname=forms.CharField(max_length=50)
 
+class Export(forms.Form):
+    mobileno=forms.BooleanField()
+    
 class SchoolForm(forms.ModelForm):
     class Meta:
         model=School
@@ -188,3 +191,9 @@ class StudentVerifyForm(forms.ModelForm):
         model=User
         fields=['username','verified']
     username=forms.CharField(disabled=True,)
+
+class UpdateAppliedStuStatusForm(forms.ModelForm):
+    class Meta:
+        model=Applied
+        fields=["Student","Position","Status"]
+        

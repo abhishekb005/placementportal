@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% if dataset is not None %}
+
+    {{dataset.enrollment_no}}
+    <br>
+    {{dataset.School10}}
+    <br>
+    {{dataset.Branch}}
+    <br>
+    
+    {% for pos in dataset.AppliedPositions.all %}
+    {{pos}}
+    <br>
+    {% endfor %}
+    {% endif %}
+</body>
+</html>

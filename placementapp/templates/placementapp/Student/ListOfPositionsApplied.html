@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Applied </title>
+</head>
+<body>
+    {% for data in dataset %}
+<dl>  
+    <dt>Position</dt>  
+    <dd>{{data.Position}}</dd>  
+    <dt>Time</dt>  
+    <dd>{{data.Time}}</dd>  
+   <dt>Status</dt>  
+   <dd>{{data.Status}}</dd>  
+    <dt>Final Offer</dt>  
+    <dd>{{data.FinalOffer}}</dd>
+    <dt>Branchs</dt> 
+  </dl> 
+  {% for branchds in data.Position.branch.all %}
+
+{{branchds}}
+<br>
+{% endfor %}
+<br><hr>
+{% endfor %}
+</body>
+</html>
+{% endblock %}

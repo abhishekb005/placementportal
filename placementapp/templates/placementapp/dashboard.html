@@ -25,8 +25,6 @@ Hello Student, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/Offers">View Offers</a>
 <br>
-<a href="/Dashboard">Messages from Placement Cell</a>
-<br>
 {% endif %}
 {% if user.user_type == 4 %}
 
@@ -44,6 +42,57 @@ Hello Mentor, {{ user.username|default:'Guest' }}!
 <a href="/verifyStu">Verify Students</a>
 <br>
 {% endif %}
+{% if user.user_type == 3 %}
+
+Hello Company, {{ user.username|default:'Guest' }}!
+
+<br>
+<a href="/Dashboard">Dashboard</a>
+<br>
+<a href="/Position/create">Create Position</a>
+<br>
+<a href="/Position">View Positions Already Created</a>
+<br>
+<a href="/Offer/create">Create Offer</a>
+<br>
+<a href="/Offer">View Offers Created By Company</a>
+<br>
+<a href="/assignoffer">Assign Created Offer to Selected Students</a>
+<br>
+<a href="/UpdateAppliedStuStatus">Update Student Status </a>
+<br>
+<a href="/Students">View Student who Applied </a>
+<br>
+{% endif %}
+{% if user.user_type == 4 %}
+
+Hello Placement Officer, {{ user.username|default:'Guest' }}!
+
+<br>
+<a href="/Dashboard">Dashboard</a>
+<br>
+<a href="/stusignup">Student SignUp</a>
+<br>
+<a href="/mentorsignup">Mentor Signup</a>
+<br>
+<a href="/ploffsignup">Placement Officer SignUp</a>
+<br>
+<a href="/companysignup">Company SignUp</a>
+<br>
+<a href="/verifyStu">Verify Users Grouped By there User Type</a>
+<br>
+<a href="/Dashboard">View All Companies With Detail,Update And Delete Button </a>
+<br>
+<a href="/Dashboard">View All Positions With Detail, Update And Delete Button </a>
+<br>
+<a href="/Dashboard">View All Students With Detail,Update And Delete Button</a>
+<br>
+<a href="/Dashboard">View All Info of Student who Applied for Positions   </a>
+<br>
+<a href="/Dashboard"></a>
+<br>
+{% endif %}
+
 {% endif %}
 {% endblock %}
 <body>

@@ -39,26 +39,32 @@ urlpatterns = [
     #For Campany return Position Associated with the company
     #For PlacementOffi return all positions 
     path('Position',views.ListPositionView),
-    #path('Positions/Company/<int:id>',views.),
-    path('Position/create',views.createPosition),
-    path('Position/update/<int:_id>',views.UpdatePosition),
-    path('Position/delete/<int:_id>',views.DeletePosition),
 
-    path('AppliedPosition',views.ListOfAppliedPositions),
-
+#Student
+    path('AppliedPosition',views.ListOfPositionsApplied),
     path("Offers",views.OfferStudentView),
+    path('ApplyPosition',views.applyView),
+    path('apply/<int:id>/',views.applyForPosition,name="applypos"),
+
+#company
     path('Offer',views.ListOffer),
     path('Offer/create',views.CreateOffer),
     path('Offer/update/<int:id>/',views.UpdateOffer),
     path('Offer/delete/<int:id>',views.DeleteOffer),
-    
-    path('ApplyPosition',views.applyView),
-    path('apply/<int:id>/',views.applyForPosition,name="applypos"),
+    path('assignOffer',views.AssignOffer),
+    path('UpdateAppliedStuStatus',views.UpdateAppliedStuStatus),
+    path('Position/<int:id>/ListStuApplied',views.ListOfAppliedStuForPos,name='AppliedStudent'),
+    path('Position/create',views.createPosition),
+    path('Position/update/<int:_id>',views.UpdatePosition),
+    path('Position/delete/<int:_id>',views.DeletePosition),
 
-    path('assignoffer',views.AssignOffer),
-    path('Students',views.ListOfStudentCompany),
+    #return Applied{Position,Student}
+    path('Students',views.ListOfPositionsApplied),
     path('Students/<int:id>',views.StudentDetailView,name='StuDetail'),
+    #return of Stu type
+    path('StudentList',views.ListStudentView),
+
+    
     path('AssignMentor',views.AddStudentMentor),
     path('verifyStu',views.VerifyStudentView),
-    path('StudentList',views.ListStudentView),
 ]
