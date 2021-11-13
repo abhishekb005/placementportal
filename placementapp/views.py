@@ -102,7 +102,7 @@ def PlacementOfficerSignUp(request):
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=PlacementOfficerSignUpForm()
-        return render(request,'placementapp/signup.html',{'form':form})
+        return render(request,'placementapp/PlacementOff/signup.html',{'form':form})
 # def AppliedPositions(request):
 #     if request.user.is_authenticated and request.user.user_type==1 and request.user.verified:
 #         applied=Applied.objects.filter(Student__user=request.user)
@@ -220,9 +220,46 @@ def ListOfPositionsApplied(request):
 
         elif varuser.user_type==2:
             applied=Applied.objects.all().order_by('Time')
-        return render(request,'placementapp/PlacementOff/ListOfApplied.html',{'dataset':applied})
+            return render(request,'placementapp/PlacementOff/ListOfApplied.html',{'dataset':applied})
 
     return HttpResponse('<h1> Session User not a verified User </h1>')
+
+def AppliedDetailView(request,id):
+    varuser=request.user
+    if varuser.verified and varuser.is_authenticated:
+        if varuser.user_type==2:
+            applied=Applied.objects.get(pk=id)
+            if applied is not None:
+                return render(request,'placementapp/PlacementOff/AppliedDetail.html',{'data': applied})
+            return HttpResponse('<h1>No Applied Detail  </h1>')
+        return HttpResponse('<h1>Not Authorised  </h1>')
+def DeleteApplied(request,id):
+    try:
+        applied = get_object_or_404(Applied,id =id)
+    except Exception:
+        raise Http404('Does Not Exist')
+ 
+    if request.method == 'POST':
+        applied.delete()
+        return redirect('/')
+    else:
+        return render(request, 'placementapp/PlacementOff/deleteapplied.html')
+def UpdateApplied(request,id):
+    try:
+        old_data = get_object_or_404(Applied,id=id)
+    except Exception:
+        raise Http404('Does Not Exist')
+    if request.method =='POST':
+        form =AppliedForm(request.POST, instance =old_data)
+        if form.is_valid():
+            form.save()
+            return redirect(f'/Applied/update/{id}')
+    else:
+        form = AppliedForm(instance = old_data)
+        context ={
+            'form':form
+        }
+        return render(request,'placementapp/PlacementOff/updateApplied.html',context)
 
 def OfferStudentView(request):
     varuser=request.user
@@ -232,6 +269,7 @@ def OfferStudentView(request):
             return HttpResponse('<h1>No Offers </h1>')
         return render(request,'placementapp/Offers.html',{'dataset':applied})
     return HttpResponse('<h1> Session User not a verified Student </h1>')
+
 def ListOfAppliedStuForPos(request,id):
     varuser=request.user
     appliedStu=None
@@ -239,19 +277,11 @@ def ListOfAppliedStuForPos(request,id):
         if varuser.user_type==3:
             appliedStu=Applied.objects.filter(Position__id=id)
             return render(request,'placementapp/Company/ListAppliedStuForPos.html',{'dataset':appliedStu})
-# def ListOfStudentCompany(request):
-#     applied=getStudentApplied(request)
-#     return render(request,'placementapp/position.html',{'dataset':applied})
+        elif varuser.user_type==2:
+            appliedStu=Applied.objects.filter(Position__id=id)
+            return render(request,'placementapp/PlacementOff/ListAppliedStuForPos.html',{'dataset':appliedStu})
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
-# def ListOfAppliedPositions(request):
-#     applied=getStudentApplied(request)
-    
-#     return render(request,'placementapp/appliedStu.html',{'dataset':applied})
-
-#Update status of Students who are eligible for next round
-# Create New Offer for Particular Position -Create A form then save
-# Update Existing Offer
-#  
 # Delete Offer
 def deleteOffer(request,id):
     offer=Offers.objects.get(pk=id)
@@ -297,6 +327,44 @@ def StudentDetailView(request,id):
                 return render(request,'placementapp/Company/StudentDetail.html',{'dataset': Stu})
             return HttpResponse('<h1>Student Did Not Apply for This Compny , So Detail View Not Available  </h1>')
     return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
+def DeleteStudent(request,id):
+    varuser=request.user
+    if varuser.verified and varuser.is_authenticated:
+        if varuser.user_type==4 or varuser.user_type==2:
+
+            try:
+                student = Student.objects.get(user__id=id)
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method == 'POST':
+                student.delete()
+                return redirect('/')
+            else:
+                return render(request, 'placementapp/PlacementOff/deleteStudent.html')
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
+
+def UpdateStudent(request,id):
+    varuser=request.user
+    if varuser.verified and varuser.is_authenticated:
+        if varuser.user_type==4 or varuser.user_type==2:
+
+            try:
+                student = Student.objects.get(user__id=id)
+            except Exception:
+                raise Http404('Does Not Exist')
+            if request.method =='POST':
+                form =StudentForm(request.POST, instance=student)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Student/update/{id}')
+            else:
+                form = StudentForm(instance = student)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/PlacementOff/updateStudent.html',context)
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def ListStudentView(request):
     varuser=request.user
@@ -323,37 +391,44 @@ def createPosition(request):
             
     form=PositionForm()
     return render(request,'placementapp/Company/createposition.html',{'form':form})
-    return render(request,'placementapp/createposition.html',{'form':form})
     
 def UpdatePosition(request,_id):
-    try:
-        old_data = get_object_or_404(Position,id =_id)
-    except Exception:
-        raise Http404('Does Not Exist')
- 
-    if request.method =='POST':
-        form =PositionForm(request.POST, instance =old_data)
-        if form.is_valid():
-            form.save()
-            return redirect(f'/Position/update/{_id}')
-    else:
-        form = PositionForm(instance = old_data)
-        context ={
-            'form':form
-        }
-        return render(request,'placementapp/Company/updateposition.html',context)
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==2:
+
+            try:
+                old_data = get_object_or_404(Position,id =_id)
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method =='POST':
+                form =PositionForm(request.POST, instance =old_data)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Position/update/{_id}')
+            else:
+                form = PositionForm(instance = old_data)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/PlacementOff/updateposition.html',context)
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def DeletePosition(request,_id):
-    try:
-        data = get_object_or_404(Position,id =_id)
-    except Exception:
-        raise Http404('Does Not Exist')
- 
-    if request.method == 'POST':
-        data.delete()
-        return redirect('/')
-    else:
-        return render(request, 'placementapp/Company/deleteposition.html')
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==2:
+
+            try:
+                data = get_object_or_404(Position,id =_id)
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method == 'POST':
+                data.delete()
+                return redirect('/')
+            else:
+                return render(request, 'placementapp/PlacementOff/deleteposition.html')
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def CreateOffer(request):
     if request.user.user_type==3 or request.user.user_type==2 and request.user.verified:
@@ -369,7 +444,7 @@ def CreateOffer(request):
     return redirect('/')    
 
 def UpdateOffer(request,id):
-    if request.user.is_authenticated and request.user.verified  or request.user.user_type==2:
+    if request.user.is_authenticated and request.user.verified :
         if request.user.user_type==3:
     
             try:
@@ -393,9 +468,30 @@ def UpdateOffer(request,id):
                     'form':form
                 }
                 return render(request,'placementapp/Company/updateOffer.html',context)
+        elif request.user.user_type==2:
+    
+            try:
+                old_data = get_object_or_404(Offers,id =id)
+               
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method =='POST':
+                form =OfferForm(request.user,request.POST, instance =old_data)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Offer/update/{id}')
+            else:
+                form = OfferForm(request.user,instance = old_data)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/PlacementOff/updateOffer.html',context)
+
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def DeleteOffer(request,id):
-    if request.user.is_authenticated and request.user.verified  or request.user.user_type==2:
+    if request.user.is_authenticated and request.user.verified :
         if request.user.user_type==3:
             try:
                 data = get_object_or_404(Offers,id=id)
@@ -415,7 +511,7 @@ def DeleteOffer(request,id):
         elif request.user.user_type==2:
             try:
                 data = get_object_or_404(Offers,id=id)
-                Pos=data.Position
+                
                 
             except Exception:
                 raise Http404('Does Not Exist')
@@ -425,6 +521,7 @@ def DeleteOffer(request,id):
                 return redirect('/')
             else:
                 return render(request, 'placementapp/PlacementOff/deleteOffer.html')
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def ListOffer(request):
     if request.user.is_authenticated and request.user.verified:
@@ -439,14 +536,65 @@ def ListOffer(request):
             offers=Offers.objects.filter(Position__Company=comp)
             return render(request,'placementapp/Company/Offers.html',{'dataset':offers})
         
-        if request.user.user_type==4:
+        if request.user.user_type==2:
             offers=Offers.objects.all()
             return render(request,'placementapp/PlacementOff/Offers.html',{'dataset':offers})    
+        
+        if request.user.user_type==4:
+            Stu=Student.objects.filter(mentor__user=request.user)
+            applied=Applied.objects.filter(Student__in=Stu,).exclude(FinalOffer=None)
+            offers={}
+            for x in applied:
+                offers.add(x.FinalOffer)        
+            
+            return render(request,'placementapp/PlacementOff/Offers.html',{'dataset':offers})    
+
     return HttpResponse('<h1>Not Authorised</h1>')
 
+def ListCompany(request):
+    if request.user.user_type==2 and request.user.is_authenticated and request.user.verified:
+        comp=Company.objects.all()
+        return render(request,'placementapp/PlacementOff/ListCompany.html',{'dataset':comp})
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
+
+def UpdateCompany(request,id):
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==2:
+            try:
+                company = Company.objects.get(user__id=id)
+            except Exception:
+                raise Http404('Does Not Exist')
+            if request.method =='POST':
+                form = CompanyForm(request.POST, instance=company)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Company/update/{id}')
+            else:
+                form = AppliedForm(instance = company)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/PlacementOff/updateCompany.html',context)
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
+
+def DeleteCompany(request,id):
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==2:
+            try:
+                company = Company.objects.get(user__id=id)
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method == 'POST':
+                if company is not None:
+                    company.delete()
+                return redirect('/')
+            else:
+                return render(request, 'placementapp/PlacementOff/deleteCompany.html')
+    return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def ListPositionView(request):
-    if request.user.user_type==2 and request.user.is_authenticated and request.user.verified:
+    if request.user.user_type==4 and request.user.is_authenticated and request.user.verified:
         return HttpResponse('<h1> Mentor: No Company Position </h1>')
     elif request.user.is_authenticated and request.user.verified and request.user.user_type==3:
         Comp=Company.objects.get(user=request.user)
@@ -456,10 +604,12 @@ def ListPositionView(request):
         Stu=Student.objects.get(user=request.user)
         positions=Position.objects.filter(branch=Stu.Branch)
         return render(request, 'placementapp/Student/ListPositions.html',{'dataset':positions}) 
+    elif request.user.is_authenticated and request.user.verified and request.user.user_type==2:
+        positions=Position.objects.all()
+        return render(request, 'placementapp/PlacementOff/ListPositions.html',{'dataset':positions})     
     else:
         return HttpResponse('<h1> Current Session User might not be Authenticated or verified by the PlacementCell or Mentor</h1>') 
         
-
 def AssignOffer(request):
     if request.user.is_authenticated and request.user.verified:
         if request.user.user_type==3:
@@ -588,7 +738,7 @@ def VerifyStudentView(request):
         if varuser.user_type==4:
             Stu=Student.objects.filter(mentor__user=varuser)
         elif varuser.user_type==2:
-            Stu=Student.objects.filter(verified=False)
+            Stu=Student.objects.filter(user__verified=False)
         userr=[]
         for student in Stu:
             userr.append(student.user.id)

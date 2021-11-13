@@ -117,6 +117,12 @@ class StudentForm(forms.ModelForm):
         fields='__all__'
         exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12']
 
+class AppliedForm(forms.ModelForm):
+    #Student=forms.ModelChoiceField(disabled=True)
+    class Meta:
+        model=Applied
+        fields=["Student","Position","Status","Description","FinalOffer"]
+
 class CustomModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, branch):
         """ Customises the labels for checkboxes"""
@@ -196,4 +202,8 @@ class UpdateAppliedStuStatusForm(forms.ModelForm):
     class Meta:
         model=Applied
         fields=["Student","Position","Status"]
-        
+
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model=Company
+        fields='__all__'

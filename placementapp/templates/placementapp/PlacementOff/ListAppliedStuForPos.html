@@ -11,14 +11,8 @@
 <body>
     {% for data in dataset %}
 {{data}}
-{{data.Mobile_No}}
-{{data.user}}
-{{data.user.id}}
-<a href="{% url 'StuDetail' data.user.id  %}">Detail</a>
-<a href="{% url 'StuUpdate' data.user.id %}">Update</a>
-<a href="{% url 'StuDelete' data.user.id%}">Delete</a>
 
-
+<a href="{% url 'StuDetail' data.Student.user.id  %}">Detail</a>
 <hr>
 {% endfor %}
 </body>

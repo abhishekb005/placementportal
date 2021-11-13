@@ -64,7 +64,7 @@ Hello Company, {{ user.username|default:'Guest' }}!
 <a href="/Students">View Student who Applied </a>
 <br>
 {% endif %}
-{% if user.user_type == 4 %}
+{% if user.user_type == 2 %}
 
 Hello Placement Officer, {{ user.username|default:'Guest' }}!
 
@@ -81,15 +81,16 @@ Hello Placement Officer, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/verifyStu">Verify Users Grouped By there User Type</a>
 <br>
-<a href="/Dashboard">View All Companies With Detail,Update And Delete Button </a>
+<a href="/CompanyList">View All Companies With Detail,Update And Delete Button </a>
 <br>
-<a href="/Dashboard">View All Positions With Detail, Update And Delete Button </a>
+
+<a href="/Offer">List Offers with ,Update And Delete Button </a>
 <br>
-<a href="/Dashboard">View All Students With Detail,Update And Delete Button</a>
+<a href="/Position">View All Positions With Detail, Update And Delete Button </a>
 <br>
-<a href="/Dashboard">View All Info of Student who Applied for Positions   </a>
+<a href="/StudentList">View All Students With Detail,Update And Delete Button</a>
 <br>
-<a href="/Dashboard"></a>
+<a href="/Students">View All Info of Student who Applied for Positions   </a>
 <br>
 {% endif %}
 

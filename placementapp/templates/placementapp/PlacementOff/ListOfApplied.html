@@ -19,13 +19,13 @@
    <dd>{{data.Status}}</dd>  
     <dt>Final Offer</dt>  
     <dd>{{data.FinalOffer}}</dd>
-    <dt>Branchs</dt> 
   </dl> 
-  {% for branchds in data.Position.branch.all %}
 
-{{branchds}}
+  <a href="{% url 'StuDetail' data.Student.user.id  %}">Detail</a>
+  <a href="{% url 'UpdateApplied' data.id %}">Update</a>
+  <a href="{% url 'DeleteApplied' data.id%}">Delete</a>
 <br>
-{% endfor %}
+
 <br><hr>
 {% endfor %}
 </body>
