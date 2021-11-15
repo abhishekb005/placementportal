@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 #from django.forms import modelform_factory
 from django.forms import modelformset_factory
+import csv
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
@@ -282,13 +283,6 @@ def ListOfAppliedStuForPos(request,id):
             return render(request,'placementapp/PlacementOff/ListAppliedStuForPos.html',{'dataset':appliedStu})
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
-# Delete Offer
-def deleteOffer(request,id):
-    offer=Offers.objects.get(pk=id)
-    offer.delete()
-    return None
-#Update or assign Offer to those Student who applied for the position and got selected
-#NEw
 
 def StudentDetailView(request,id):
     varuser=request.user
@@ -327,6 +321,7 @@ def StudentDetailView(request,id):
                 return render(request,'placementapp/Company/StudentDetail.html',{'dataset': Stu})
             return HttpResponse('<h1>Student Did Not Apply for This Compny , So Detail View Not Available  </h1>')
     return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
+
 def DeleteStudent(request,id):
     varuser=request.user
     if varuser.verified and varuser.is_authenticated:
@@ -378,7 +373,6 @@ def ListStudentView(request):
         return render(request, 'placementapp/PlacementOff/ListStudent.html',{'dataset':Stu})
     return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
 
-    
 
 def createPosition(request):
     if request.method=='POST' and request.user.user_type==3 :
@@ -429,6 +423,7 @@ def DeletePosition(request,_id):
             else:
                 return render(request, 'placementapp/PlacementOff/deleteposition.html')
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
+
 
 def CreateOffer(request):
     if request.user.user_type==3 or request.user.user_type==2 and request.user.verified:
@@ -522,6 +517,7 @@ def DeleteOffer(request,id):
             else:
                 return render(request, 'placementapp/PlacementOff/deleteOffer.html')
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
+
 
 def ListOffer(request):
     if request.user.is_authenticated and request.user.verified:
@@ -655,6 +651,7 @@ def AddStudentMentor(request):
             extra=20,
             max_num=22,
             can_delete=True,
+            
         #formset=BaseAppliedFormSet,
         #form=MyAppliedForm,
         )
@@ -780,3 +777,45 @@ def VerifyStudentView(request):
         return render(request,'placementapp/VerifyStudent.html',{'formset':formset})
     return HttpResponse("<h1> Not Authorised</h1>")
 
+
+def export(request,headerrow):
+    response = HttpResponse(content_type='text/csv')
+    writer = csv.writer(response)
+    writer.writerow(headerrow)
+    print(headerrow)
+    if "AppliedPosition" in headerrow:
+        headerrow.remove("AppliedPosition") 
+    for student in Student.objects.all().values(*headerrow):
+    
+        if "Branch" in headerrow:
+            bds=BranchDS.objects.get(pk=student['Branch'])
+            student['Branch']=str(bds)
+        writer.writerow(student.values())
+    response['Content-Disposition'] = 'attachment; filename="students.csv"'
+    return response
+
+
+def home_view(request):
+    w=['enrollment_no','first_name','last_name','gender','Email','Mobile_No','School10','School12','Score10','Score12','JeePercentile',
+      'Branch']
+    
+    w1=[]
+    r=[]
+    if request.method=='POST':
+        form=Export(request.POST)
+        if form.is_valid():
+            for fields in form:
+                s=form.cleaned_data[fields.html_name]
+                w1.append(fields.html_name)
+                print()
+                if s==True:
+                    r.append(fields.html_name)
+                
+        print(r)
+        
+        form=Export()
+        return export(request,r)         
+    else:
+        form=Export()
+    return render(request,'placementapp/export.html',{'form':form})
+    
