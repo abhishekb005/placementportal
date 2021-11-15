@@ -38,6 +38,8 @@ def userlogout(request):
     logout(request)
     messages.info(request,"You have Successfully logged out")
     return redirect("/login")
+def anu(request):
+    pass
 
 def signup(request):
     if request.user.is_authenticated:
