@@ -40,7 +40,6 @@ class Branch(models.Model):
     Branch_Name=models.CharField(max_length=40,)
     Degree=models.ManyToManyField(to=Degree,through='BranchDS')
     
-
     def __str__(self):
         
         return f"{self.Branch_Name}"
@@ -96,6 +95,7 @@ class Company(models.Model):
         return f"{self.Name}"
 
 class Position(models.Model):
+    Name=models.CharField(max_length=100)
     Company=models.ForeignKey(to=Company,on_delete=models.CASCADE)
     minCTC=models.SmallIntegerField(verbose_name='Minimum CTC in Lakhs')
     maxCTC=models.SmallIntegerField(verbose_name='Maximum CTC in Lakhs')

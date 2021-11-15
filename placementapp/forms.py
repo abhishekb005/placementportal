@@ -207,3 +207,18 @@ class CompanyForm(forms.ModelForm):
     class Meta:
         model=Company
         fields='__all__'
+
+class Export(forms.Form):
+    enrollment_no=forms.BooleanField(required=False)
+    first_name=forms.BooleanField(required=False)
+    last_name=forms.BooleanField(required=False)
+    gender=forms.BooleanField(required=False)
+    Email=forms.BooleanField(required=False)
+    Mobile_No=forms.BooleanField(required=False)
+    School10=forms.BooleanField(required=False)
+    School12=forms.BooleanField(required=False)
+    Score10=forms.BooleanField(required=False)
+    Score12=forms.BooleanField(required=False)
+    JeePercentile=forms.BooleanField(required=False)
+    Branch=forms.BooleanField(required=False)
+    

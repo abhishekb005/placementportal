@@ -19,6 +19,7 @@
 {{branchds}}
 
 {% endfor %}
+
 <form action="{% url 'applypos' pos.id %}" method="post">
     {% csrf_token %}
     <input type="submit" value="Apply for the position">
