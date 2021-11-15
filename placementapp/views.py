@@ -819,5 +819,3 @@ def home_view(request):
         form=Export()
     return render(request,'placementapp/export.html',{'form':form})
     
-def exportcsv(request):
-    pass
