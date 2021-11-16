@@ -821,3 +821,103 @@ def home_view(request):
         form=Export()
     return render(request,'placementapp/export.html',{'form':form})
     
+def exportview(request,f_id):
+    if request.user.is_authenticated and request.user.verified:
+        if request.user.user_type==2:
+            d={1:StudentdataExportbyplacementofficer,2:PositionExportplacementofficer,3:AppliedExportplacementofficer,4:OffersExportplacementofficer,5:CompanyExportplacementofficer,6:MentorExportplacementofficer}
+        if request.user.user_type==3:
+            d={1:StudentdataExportbycompany,3:AppliedExportcompany}
+        if request.user.user_type==4:
+            d={1:StudentdataExportbymentor,3:AppliedExportmentor}
+        w1=[]
+        m={1:Student,2:Position,3:Applied,4:Offers,5:Company,6:Mentor}
+        headerrow=[]
+        if request.method=='POST':
+            form=d[f_id](request.POST)
+            if form.is_valid():
+                for fields in form:
+                    s=form.cleaned_data[fields.html_name]
+                    w1.append(fields.html_name)
+                    if s==True:
+                        headerrow.append(fields.html_name)
+                if f_id==1:
+                    j={'School10':School,'School12':School,'Branch':BranchDS,'mentor':Mentor,'PlacementCell':PlacementCell} 
+                    if request.user.user_type==2:
+                        branchlist=[]
+                        branchlist=form.cleaned_data['branchlist']
+                        if branchlist is not None:
+                            cusqueryset=Student.objects.filter(Branch__in=branchlist).values(*headerrow)
+                        else:
+                            cusqueryset=Student.objects.all().values(*headerrow)
+                        print(cusqueryset)
+                        
+                        
+                    if request.user.user_type==3:
+                        cusqueryset=Student.objects.filter(AppliedPositions__Company__user=request.user).values(*headerrow)
+                    if request.user.user_type==4:
+                        cusqueryset=Student.objects.filter(mentor__user=request.user).values(*headerrow)
+                    
+                elif f_id==2:
+                    j={'Company':Company}
+                    if request.user.user_type==2:
+                        cusqueryset=Position.objects.all().values(*headerrow)
+                    
+                elif f_id==3:
+                    j={'Student':Student,'Position':Position,'FinalCTC': Offers}
+                    if request.user.user_type==2:
+                        if form.cleaned_data['From'] is  None :
+                            cusqueryset=Applied.objects.filter(Time__lte=form.cleaned_data['To']).values(*headerrow)
+                        else:
+                            cusqueryset=Applied.objects.filter(Time__gte=form.cleaned_data['From'],Time__lte=form.cleaned_data['To'])
+                    elif request.user.user_type==3:
+                        cusqueryset=Applied.objects.filter(Position__Company__user=request.user).values(*headerrow)
+                    elif request.user.user_type==4:
+                        cusqueryset=Applied.objects.filter(Student__mentor=request.user).values(*headerrow)
+                    
+                elif f_id==4:
+                    j={'Position':Position}
+                    if request.user.user_type==2:
+                        cusqueryset=Offers.objects.all().values(*headerrow)
+                    elif request.user.user_type==3:
+                        cusqueryset=Offers.objects.filter(Position__Company__user=request.user).values(*headerrow)
+                    
+                elif f_id==5 or f_id==6:
+                    j={}
+
+                    cusqueryset=m[id].objects.all().values(*headerrow)
+                    
+            form=d[f_id]()
+            return export(request,headerrow,f_id,cusqueryset)         
+        else:
+            form=d[f_id]()
+        return render(request,'placementapp/export.html',{'form':form})
+
+
+def export(request,headerrow,id,cusqueryset):
+    response = HttpResponse(content_type='text/csv')
+    writer = csv.writer(response)
+    writer.writerow(headerrow)
+    m={1:Student,2:Position,3:Applied,4:Offers,5:Company,6:Mentor}
+    if id==1:
+        j={'School10':School,'School12':School,'Branch':BranchDS,'mentor':Mentor,'PlacementCell':PlacementCell} 
+        
+    elif id==2:
+        j={'Company':Company}
+        
+    elif id==3:
+        j={'Student':Student,'Position':Position,'FinalCTC': Offers}
+        
+    elif id==4:
+        j={'Position':Position}
+        
+    elif id==5 or id==6:
+        j={}
+    
+    for data in cusqueryset:
+        for k in j:
+            if k in headerrow:
+                bds=j[k].objects.get(pk=data[k])
+                data[k]=str(bds)
+        writer.writerow(data.values())
+    response['Content-Disposition'] = 'attachment; filename="Export.csv"'
+    return response

@@ -41,6 +41,10 @@ Hello Mentor, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/verifyStu">Verify Students</a>
 <br>
+<a href="/exportcsv/3">Export Students </a>
+<br>
+<a href="/exportcsv/3">Export Applied Data Of Mentor's Students </a>
+<br>
 {% endif %}
 {% if user.user_type == 3 %}
 
@@ -61,7 +65,11 @@ Hello Company, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/UpdateAppliedStuStatus">Update Student Status </a>
 <br>
-<a href="/Students">View Student who Applied </a>
+<a href="/applied">View Student who Applied </a>
+<br>
+<a href="/exportcsv/1">Export Students who Applied </a>
+<br>
+<a href="/exportcsv/3">Export Applied </a>
 <br>
 {% endif %}
 {% if user.user_type == 2 %}
@@ -90,15 +98,15 @@ Hello Placement Officer, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/StudentList">View All Students With Detail,Update And Delete Button</a>
 <br>
-<a href="/Students">View All Info of Student who Applied for Positions   </a>
+<a href="/applied">View All Info of Student who Applied for Positions   </a>
 <br>
-<a href="/">Export Applied Info   </a>Models Applied
+<a href="/exportcsv/3">Export Applied Info   </a>
 <br>
-<a href="/">Export Students data   </a>Model Student
+<a href="/exportcsv/1">Export Students data   </a>
 <br>
-<a href="/">Export Company data   </a>Model Company
+<a href="/exportcsv/5">Export Company data   </a>
 <br>
-<a href="/">Export Offers Data   </a>
+<a href="/exportcsv/4">Export Offers Data   </a>
 <br>
 {% endif %}
 

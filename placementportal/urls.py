@@ -61,7 +61,7 @@ urlpatterns = [
     path('Position/delete/<int:_id>',views.DeletePosition,name="DeletePosition"),
     
     #return Applied{Position,Student}
-    path('Students',views.ListOfPositionsApplied),
+    path('applied',views.ListOfPositionsApplied),
     path('Applied/update/<int:id>',views.UpdateApplied,name="UpdateApplied"),
     path('Applied/delete/<int:id>',views.DeleteApplied,name="DeleteApplied"),
     #return of Stu type
@@ -74,6 +74,6 @@ urlpatterns = [
     path('Company/delete/<int:id>',views.DeleteCompany,name='DeleteCompany'),
     path('AssignMentor',views.AddStudentMentor),
     path('verifyStu',views.VerifyStudentView),
-    path('exportpdf/',views.home_view,name='export'),
+    path('exportcsv/<int:f_id>',views.exportview,name='export'),
 
 ]
