@@ -116,7 +116,7 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model=Student
         fields='__all__'
-        exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12']
+        exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12','ResumeURL']
 
 class AppliedForm(forms.ModelForm):
     #Student=forms.ModelChoiceField(disabled=True)
@@ -263,8 +263,8 @@ class AppliedExportplacementofficer(forms.Form):
     Time=forms.BooleanField(required=False)
     Description=forms.BooleanField(required=False)
     FinalOffer=forms.BooleanField(required=False)
-    From=forms.DateTimeField()
-    To=forms.DateTimeField(initial=datetime.now)
+    Companies=forms.ModelMultipleChoiceField(queryset=Company.objects.all())
+    Till=forms.DateTimeField(initial=datetime.now)
 
 class OffersExportplacementofficer(forms.Form):
     Position=forms.BooleanField(required=False)

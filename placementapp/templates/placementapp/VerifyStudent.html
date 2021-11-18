@@ -15,6 +15,9 @@
         <table>
         {% for form in formset %}
         {{form}}
+        
+        <a href="{% url 'StuDetail1' form.username.value %}">Student Detail</a>
+        
         {% endfor %}
     </table>
         <input type="submit" value="Assign">

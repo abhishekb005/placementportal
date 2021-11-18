@@ -15,7 +15,10 @@
     <br>
     {{dataset.Branch}}
     <br>
-    
+    {% if dataset.ResumeURL %}
+    <a href="{{dataset.ResumeURL}}"> download Resume</a>
+    {% endif %}
+    <br>
     {% for pos in dataset.AppliedPositions.all %}
     {{pos}}
     <br>

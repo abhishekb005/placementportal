@@ -1,6 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.forms.fields import FileField
 
 # Creating Diff User by inheriting AbstractUser  
 class User(AbstractUser):
@@ -57,9 +58,9 @@ class BranchDS(models.Model):
 class Staff(models.Model):
     first_name=models.CharField(max_length=30)
     last_name=models.CharField(max_length=30)
-    Gender_Choices=[('M','MALE'),
-    ('F','FEMALE'),
-    ('O','OTHERS'),
+    Gender_Choices=[('MALE','MALE'),
+    ('FEMALE','FEMALE'),
+    ('OTHERS','OTHERS'),
     ]
     gender=models.CharField(choices=Gender_Choices,null=True,max_length=10,)
     Email=models.EmailField()
@@ -113,9 +114,9 @@ class Student(models.Model):
     enrollment_no=models.CharField(max_length=12)
     first_name=models.CharField(max_length=30)
     last_name=models.CharField(max_length=30)
-    Gender_Choices=[('M','MALE'),
-    ('F','FEMALE'),
-    ('O','OTHERS'),
+    Gender_Choices=[('MALE','MALE'),
+    ('FEMALE','FEMALE'),
+    ('OTHERS','OTHERS'),
     ]
     gender=models.CharField(choices=Gender_Choices,null=True,max_length=10,)
     Email=models.EmailField(null=False,blank=False)
@@ -133,7 +134,9 @@ class Student(models.Model):
     mentor=models.ForeignKey(to=Mentor,on_delete=models.SET_NULL,null=True,blank=True)
     PlacementCell=models.ForeignKey(to=PlacementCell,null=True,blank=True,on_delete=models.SET_NULL)
     AppliedPositions=models.ManyToManyField(to=Position,through='Applied')
-
+    maxCTC=models.SmallIntegerField(null=True,default=0)
+    Resume=models.FileField(upload_to="Resume",blank=True)
+    ResumeURL=models.TextField(null=True,blank=True,)
     def __str__(self):
         return f"{self.enrollment_no} "
 
@@ -184,7 +187,7 @@ class Offers(models.Model):
         return f"{self.Position}  {self.FinalCTC}"
 
 class Applied(models.Model):
-    Status_Choices=[('S','Selected'),('ENR','EligibleForNextRound'),('R','Rejected'),('UE','UnderEvaluation'),]
+    Status_Choices=[('Selected','Selected'),('EligibleForNextRound','EligibleForNextRound'),('Rejected','Not Eligible For Next Round'),('Under Evaluation','Under Evaluation'),]
     Student=models.ForeignKey(to=Student,on_delete=models.CASCADE)
     Position=models.ForeignKey(to=Position,on_delete=models.CASCADE)
     Status=models.CharField(max_length=30,choices=Status_Choices,default='UnderEvaluation')

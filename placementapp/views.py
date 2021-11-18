@@ -1,8 +1,12 @@
+
+import pyrebase
 from django.conf.urls import include
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import query
 from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404,HttpResponseRedirect
 from .forms import *
+from django.core.files.storage import default_storage
+
 from django.contrib import messages
 from django.contrib.auth import login, authenticate,logout
 from django.contrib.auth.decorators import login_required
@@ -10,6 +14,11 @@ from .models import *
 #from django.forms import modelform_factory
 from django.forms import modelformset_factory
 import csv
+from .Credential import conf
+
+firebase=pyrebase.initialize_app(conf.getConfig())
+storage=firebase.storage()
+
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
@@ -38,8 +47,7 @@ def userlogout(request):
     logout(request)
     messages.info(request,"You have Successfully logged out")
     return redirect("/login")
-def anu(request):
-    pass
+    
 
 def signup(request):
     if request.user.is_authenticated:
@@ -119,9 +127,16 @@ def applyView(request):
     if request.user.is_authenticated and request.user.user_type==1 and request.user.verified:
         alreadyApplied=Applied.objects.filter(Student__user=request.user)
         alreadyAppliedPositions=[]
+        alreadyAppliedOffer=[]
         Stu=Student.objects.get(user=request.user)
+        max=Stu.maxCTC
         for applied in alreadyApplied:
             alreadyAppliedPositions.append(applied.Position.id)
+            if applied.FinalOffer is not None:
+                if max<applied.FinalOffer.FinalCTC:
+                    max=applied.FinalOffer.FinalCTC
+        Stu.maxCTC=max
+        Stu.save()
         position=Position.objects.filter(branch=Stu.Branch).exclude(id__in=alreadyAppliedPositions)
         return render(request,'placementapp/Student/PositionApply.html',{'Positions':position})
     return HttpResponse('<h1> Current User is not A Student or  verified </h1>')
@@ -133,12 +148,12 @@ def applyForPosition(request,id):
         pos=Position.objects.get(pk=id)
         #branchds=pos.branch
         #if stu.branch in branchds:
-        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile :
+        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.maxCTC>Stu.maxCTC+2 :
             Applied.objects.create(Position=pos,Student=Stu)
             print(f'{Stu} {pos}')
             return HttpResponseRedirect('/ApplyPosition')
         else:
-            return HttpResponse('<h1> Not Eligible For Position </h1>')
+            return HttpResponse('<h1> Not Eligible For Position Due To Marks Or Might Be Placed with Good CTC</h1>')
     else:
         return HttpResponse('<h1> Not Authenticated or verified Student </h1>')
 
@@ -158,13 +173,25 @@ def StudentUpdateProfile(request):
     if request.user.is_authenticated:
         if request.user.user_type==1:
             stu=Student.objects.get(user=request.user)
+            url=stu.ResumeURL
             if request.method=='POST':
-                form=StudentForm(request.POST,instance=stu)
+                form=StudentForm(request.POST,request.FILES,instance=stu)
                 if form.is_valid():
-                    form.save()
+                    f=form.save(commit=False)
+                    file = request.FILES['Resume']
+                    if file is not None:
+                        file_save = default_storage.save(file.name, file)
+                        storage.child("resume/"+file.name).put("media/" + file.name)
+                        url=storage.child("resume/"+file.name).get_url(None)
+                        print(url)
+                        delete = default_storage.delete(file.name)
+                        messages.success(request, "File upload in Firebase Storage successful")
+                        f.ResumeURL=url
+                        f.save()
             else:
                 form=StudentForm(instance=stu)
-            return render(request,'placementapp/Student/UpdateProfile.html',{'form':form})
+                url=stu.ResumeURL
+            return render(request,'placementapp/Student/UpdateProfile.html',{'form':form,'url':url})
         else:
             return HttpResponse('<h1> Current User is not of A Student </h1>')
     else:
@@ -236,6 +263,7 @@ def AppliedDetailView(request,id):
                 return render(request,'placementapp/PlacementOff/AppliedDetail.html',{'data': applied})
             return HttpResponse('<h1>No Applied Detail  </h1>')
         return HttpResponse('<h1>Not Authorised  </h1>')
+
 def DeleteApplied(request,id):
     try:
         applied = get_object_or_404(Applied,id =id)
@@ -247,6 +275,7 @@ def DeleteApplied(request,id):
         return redirect('/')
     else:
         return render(request, 'placementapp/PlacementOff/deleteapplied.html')
+
 def UpdateApplied(request,id):
     try:
         old_data = get_object_or_404(Applied,id=id)
@@ -288,6 +317,48 @@ def ListOfAppliedStuForPos(request,id):
 
 def StudentDetailView(request,id):
     varuser=request.user
+    if varuser.verified and varuser.is_authenticated:
+        if varuser.user_type==4:
+            StuUser=User.objects.get(pk=id)
+            mentorr=Mentor.objects.get(user=varuser)
+            Stu=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser,mentor=mentorr)
+            
+            if Stu is not None:
+                return render(request,'placementapp/Mentor/StudentDetail.html',{'dataset': Stu})
+            else:
+                return HttpResponse('<h1>This Student Mentor is different from current  </h1>')
+        if varuser.user_type==2:
+            StuUser=User.objects.get(pk=id)
+            Stu=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser)
+            if Stu is None:
+                return HttpResponse('<h1>This Student Mentor is different from current  </h1>')
+
+            else:
+                return render(request,'placementapp/PlacementOff/StudentDetail.html',{'dataset': Stu})
+            
+        if varuser.user_type==3:
+            StuUser=User.objects.get(pk=id)
+            Stu=None
+            applied=None
+            if StuUser.user_type==1:
+                Stu=Student.objects.get(user=StuUser)
+                comp=Company.objects.get(user=varuser)
+                applied=Applied.objects.filter(Student=Stu,Position__Company=comp)
+            if applied is not None:
+                return render(request,'placementapp/Company/StudentDetail.html',{'dataset': Stu})
+            return HttpResponse('<h1>Student Did Not Apply for This Compny , So Detail View Not Available  </h1>')
+    return HttpResponse('<h1> Current User Not Authorised or Verified  </h1>')
+
+def StudentDetailView1(request,Stuenrollment):
+    varuser=request.user
+    Stu=Student.objects.get(enrollment_no=Stuenrollment)
+    id=10
+    if Stu is not None:
+        id=Stu.user.id
     if varuser.verified and varuser.is_authenticated:
         if varuser.user_type==4:
             StuUser=User.objects.get(pk=id)
@@ -487,6 +558,7 @@ def UpdateOffer(request,id):
 
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
+
 def DeleteOffer(request,id):
     if request.user.is_authenticated and request.user.verified :
         if request.user.user_type==3:
@@ -568,7 +640,7 @@ def UpdateCompany(request,id):
                     form.save()
                     return redirect(f'/Company/update/{id}')
             else:
-                form = AppliedForm(instance = company)
+                form = CompanyForm(instance = company)
                 context ={
                     'form':form
                 }
@@ -653,7 +725,7 @@ def AddStudentMentor(request):
             extra=20,
             max_num=22,
             can_delete=True,
-            
+            can_delete_extra=False,
         #formset=BaseAppliedFormSet,
         #form=MyAppliedForm,
         )
@@ -743,7 +815,7 @@ def VerifyStudentView(request):
             userr.append(student.user.id)
         StudentMentorForm=modelformset_factory(
             User,
-            fields=['verified','username'],
+            fields=['verified','username',],
             extra=0,
             max_num=20,
         #formset=BaseAppliedFormSet,
@@ -865,10 +937,12 @@ def exportview(request,f_id):
                 elif f_id==3:
                     j={'Student':Student,'Position':Position,'FinalCTC': Offers}
                     if request.user.user_type==2:
-                        if form.cleaned_data['From'] is  None :
-                            cusqueryset=Applied.objects.filter(Time__lte=form.cleaned_data['To']).values(*headerrow)
+                        if form.cleaned_data['Till'] is not None :
+                            cusqueryset=Applied.objects.filter(Time__lte=form.cleaned_data['Till']).values(*headerrow)
+                        elif form.cleaned_data['Companies'] is not None:
+                            cusqueryset=Applied.objects.filter(Position__Company__in=form.cleaned_data['Companies']).values(*headerrow)
                         else:
-                            cusqueryset=Applied.objects.filter(Time__gte=form.cleaned_data['From'],Time__lte=form.cleaned_data['To'])
+                            cusqueryset=Applied.objects.all().values(*headerrow)
                     elif request.user.user_type==3:
                         cusqueryset=Applied.objects.filter(Position__Company__user=request.user).values(*headerrow)
                     elif request.user.user_type==4:
@@ -921,3 +995,27 @@ def export(request,headerrow,id,cusqueryset):
         writer.writerow(data.values())
     response['Content-Disposition'] = 'attachment; filename="Export.csv"'
     return response
+# <script type="module">
+#   // Import the functions you need from the SDKs you need
+#   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.4.1/firebase-app.js";
+#   import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.4.1/firebase-analytics.js";
+#   // TODO: Add SDKs for Firebase products that you want to use
+#   // https://firebase.google.com/docs/web/setup#available-libraries
+
+#   // Your web app's Firebase configuration
+#   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+#   const firebaseConfig = {
+#     apiKey: "AIzaSyBSuGuIEErPN0kj3Va7uvPJiJ_oBN3mYwk",
+  #  'databaseURl':"https://campusplacementportal-default-rtdb.asia-southeast1.firebasedatabase.app/",
+#     authDomain: "campusplacementportal.firebaseapp.com",
+#     projectId: "campusplacementportal",
+#     storageBucket: "campusplacementportal.appspot.com",
+#     messagingSenderId: "337427571042",
+#     appId: "1:337427571042:web:1a6cd408a268456c65cc3b",
+#     measurementId: "G-B9XLMWY491"
+#   };
+
+#   // Initialize Firebase
+#   const app = initializeApp(firebaseConfig);
+#   const analytics = getAnalytics(app);
+# </script>

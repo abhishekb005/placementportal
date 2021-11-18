@@ -11,8 +11,8 @@
 <body>
     {% for company in dataset %}
 {{company}}
-<a href="{% url 'UpdateCompany' company.user.id %}">Update This Position</a>
-<a href="{% url 'DeleteCompany' company.user.id %}">Delete This Position</a>
+<a href="{% url 'UpdateCompany' company.user.id %}">Update This Company</a>
+<a href="{% url 'DeleteCompany' company.user.id %}">Delete This Company</a>
 
 <hr>
 {% endfor %}
