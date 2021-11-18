@@ -23,7 +23,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('/',views.dashboard),
+    
     # Student Sign-Up Page
     path('stusignup/',views.Stusignup ,name='usersignup'),
     # Placement Officer Sign-Up Page

@@ -3,7 +3,7 @@ class conf:
     def getConfig():
         config = {
         "apiKey": "AIzaSyBSuGuIEErPN0kj3Va7uvPJiJ_oBN3mYwk",
-        "databaseURl":"https://campusplacementportal-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        "databaseURL":"https://campusplacementportal-default-rtdb.asia-southeast1.firebasedatabase.app/",
         "authDomain": "campusplacementportal.firebaseapp.com",
         "projectId": "campusplacementportal",
         "storageBucket": "campusplacementportal.appspot.com",

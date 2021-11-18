@@ -179,6 +179,8 @@ def StudentUpdateProfile(request):
                 if form.is_valid():
                     f=form.save(commit=False)
                     file = request.FILES['Resume']
+                    print(file)
+                    print(f)
                     if file is not None:
                         file_save = default_storage.save(file.name, file)
                         storage.child("resume/"+file.name).put("media/" + file.name)
@@ -187,7 +189,7 @@ def StudentUpdateProfile(request):
                         delete = default_storage.delete(file.name)
                         messages.success(request, "File upload in Firebase Storage successful")
                         f.ResumeURL=url
-                        f.save()
+                    f.save()
             else:
                 form=StudentForm(instance=stu)
                 url=stu.ResumeURL
@@ -198,7 +200,7 @@ def StudentUpdateProfile(request):
         return HttpResponse('<h1> Current Session User Not Authenticated </h1>') 
 
 def dashboard(request):
-    return render(request,'placementapp/index.html')
+    return render(request,'placementapp/dashboard.html')
 
 
 def getMsg2S(request):
