@@ -23,7 +23,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
+    path("",views.userlogin),
     # Student Sign-Up Page
     path('stusignup/',views.Stusignup ,name='usersignup'),
     # Placement Officer Sign-Up Page
@@ -80,3 +80,6 @@ urlpatterns = [
     path('exportcsv/<int:f_id>',views.exportview,name='export'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
