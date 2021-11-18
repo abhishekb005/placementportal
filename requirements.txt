@@ -58,8 +58,6 @@ python-jwt==2.0.1
 pyttsx3==2.90
 PyTweening==1.0.3
 pytz==2020.1
-pywin32==301
-pywin32-ctypes==0.2.0
 requests==2.11.1
 requests-toolbelt==0.7.0
 rsa==4.7.2

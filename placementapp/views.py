@@ -19,6 +19,8 @@ from .Credential import conf
 firebase=pyrebase.initialize_app(conf.getConfig())
 storage=firebase.storage()
 
+# pywin32==301
+# pywin32-ctypes==0.2.0
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
