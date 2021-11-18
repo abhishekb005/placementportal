@@ -198,7 +198,7 @@ def StudentUpdateProfile(request):
         return HttpResponse('<h1> Current Session User Not Authenticated </h1>') 
 
 def dashboard(request):
-    return render(request,'placementapp/dashboard.html')
+    return render(request,'placementapp/index.html')
 
 
 def getMsg2S(request):
