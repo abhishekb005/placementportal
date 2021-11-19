@@ -21,9 +21,9 @@ storage=firebase.storage()
 # *.log
 # local_settings.py
 # db.sqlite3
-
 # pywin32==301
 # pywin32-ctypes==0.2.0
+# pypiwin32==223
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
