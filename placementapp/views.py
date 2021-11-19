@@ -18,6 +18,9 @@ from .Credential import conf
 
 firebase=pyrebase.initialize_app(conf.getConfig())
 storage=firebase.storage()
+# *.log
+# local_settings.py
+# db.sqlite3
 
 # pywin32==301
 # pywin32-ctypes==0.2.0
