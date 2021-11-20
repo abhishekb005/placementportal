@@ -11,6 +11,16 @@ class Command(BaseCommand):
         locale_list = ['en-US', 'en_IN', 'en_US']
         #Fake = Faker(locale_list)
         Fake=Faker(['en_IN','en-US'])
+        # boards=['CBSE','ICSE','MP BOARD']
+        # for _ in range(5):
+        # #user class
+        #     fschoolName=Fake.name()
+        #     fLocation_Name=Fake.city()
+        #     fBoard=random.choice(boards)
+        #     print(f"{fschoolName} {fLocation_Name} {fBoard}")
+        #     School.objects.get_or_create(Name=fschoolName,Location_Name=fLocation_Name,Board=fBoard)
+        
+        
         # for _ in range(5):
         #     fuser_type = 1
         #     fverified =random.choice([True,False])
@@ -25,12 +35,62 @@ class Command(BaseCommand):
         #     user.set_password(fpassword2)
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
+        # varuser=User.objects.filter(user_type=1)
+        # Gender_choice=['MALE','FEMALE','OTHERS']
+        # SchoolCount=School.objects.all().count()
+        # BranchCount=BranchDS.objects.all().count()
+        # print('check1')
+        # for urs in varuser:
+        #     fenrollment_no=urs.username
+        #     ffirst_name=urs.first_name
+        #     flast_name=urs.last_name
+        #     fgender=random.choice(Gender_choice)
+        #     fEmail=urs.email
+        #     print('check2')
+        #     fMobile_No=int(Fake.numerify(text='%#########'))
+        #     sno=Fake.random_int(1,SchoolCount)
+        #     fSchool10=School.objects.get(pk=sno)
+        #     sno=Fake.random_int(1,SchoolCount)
+        #     fSchool12=School.objects.get(pk=sno)
+        #     print('check3')
+        #     fScore10=80.75
+        #     fScore12=90.2
+        #     fJeePercentile=80.65
+        #     print('check4')
+        #     bno=Fake.random_int(1,BranchCount)
+        #     fBranch=BranchDS.objects.get(pk=bno)
+        #     fAim=Fake.paragraph(nb_sentences=3)
+        #     fObjective=Fake.paragraph(nb_sentences=3)
+        #     fMission=Fake.paragraph(nb_sentences=3)
+        #     fVision=Fake.paragraph(nb_sentences=3)
+        #     print('check5')
+        #     fPlacementCell=PlacementCell.objects.get(pk=1)
+        #     Stu=Student.objects.create(user=urs,
+        #     enrollment_no=fenrollment_no,
+        #     first_name=ffirst_name,
+        #     last_name=flast_name,
+        #     gender=fgender,
+        #     Email=fEmail,
+        #     Mobile_No=fMobile_No,
+        #     School10=fSchool10,
+        #     School12=fSchool12,
+        #     Score10=fScore10,
+        #     Score12=fScore12,
+        #     JeePercentile=fJeePercentile,
+        #     Branch=fBranch,
+        #     Aim=fAim,
+        #     Objective=fObjective,
+        #     Mission=fMission,
+        #     Vision=fVision,
+        #     PlacementCell=fPlacementCell,
+        #     )
+        #     print(Stu)
 
         # for _ in range(5):
         #     fuser_type = 3
         #     fverified =random.choice([True,False])
         #     fusername=Fake.company()
-        #     ffirst_name=Fake.company()
+        #     ffirst_name=fusername
         #     # flast_name=Fake.last_name() 
         #     femail=Fake.ascii_company_email()
         #     fpassword1="qwerty"
@@ -40,6 +100,7 @@ class Command(BaseCommand):
         #     user.set_password(fpassword2)
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
+
         # for _ in range(5):
         #     fuser_type = 4
         #     fverified =random.choice([True,False])
@@ -69,16 +130,7 @@ class Command(BaseCommand):
         #     user.save()
         #     print(f"{fusername} {fuser_type} {femail}")
         # print('Printing createdata')
-        # boards=['CBSE','ICSE','MP BOARD']
-        # for _ in range(5):
-        # #user class
-        #     fschoolName=Fake.name()
-        #     fLocation_Name=Fake.city()
-        #     fBoard=random.choice(boards)
-        #     print(f"{fschoolName} {fLocation_Name} {fBoard}")
-        #     School.objects.get_or_create(Name=fschoolName,Location_Name=fLocation_Name,Board=fBoard)
-        # d=School.objects.all()
-        # print(d)
+         
         # for _ in range(1):
         #     fDegree_Name='B.Tech'
         #     fDegree_Duration=4
@@ -179,56 +231,6 @@ class Command(BaseCommand):
 
         #Students
         
-        # varuser=User.objects.filter(user_type=1)
-        # Gender_choice=['MALE','FEMALE','OTHERS']
-        # SchoolCount=School.objects.all().count()
-        # BranchCount=BranchDS.objects.all().count()
-        # print('check1')
-        # for urs in varuser:
-        #     fenrollment_no=urs.username
-        #     ffirst_name=urs.first_name
-        #     flast_name=urs.last_name
-        #     fgender=random.choice(Gender_choice)
-        #     fEmail=urs.email
-        #     print('check2')
-        #     fMobile_No=int(Fake.numerify(text='%#########'))
-        #     sno=Fake.random_int(1,SchoolCount)
-        #     fSchool10=School.objects.get(pk=sno)
-        #     sno=Fake.random_int(1,SchoolCount)
-        #     fSchool12=School.objects.get(pk=sno)
-        #     print('check3')
-        #     fScore10=80.75
-        #     fScore12=90.2
-        #     fJeePercentile=80.65
-        #     print('check4')
-        #     bno=Fake.random_int(1,BranchCount)
-        #     fBranch=BranchDS.objects.get(pk=bno)
-        #     fAim=Fake.paragraph(nb_sentences=3)
-        #     fObjective=Fake.paragraph(nb_sentences=3)
-        #     fMission=Fake.paragraph(nb_sentences=3)
-        #     fVision=Fake.paragraph(nb_sentences=3)
-        #     print('check5')
-        #     fPlacementCell=PlacementCell.objects.get(pk=1)
-        #     Stu=Student.objects.create(user=urs,
-        #     enrollment_no=fenrollment_no,
-        #     first_name=ffirst_name,
-        #     last_name=flast_name,
-        #     gender=fgender,
-        #     Email=fEmail,
-        #     Mobile_No=fMobile_No,
-        #     School10=fSchool10,
-        #     School12=fSchool12,
-        #     Score10=fScore10,
-        #     Score12=fScore12,
-        #     JeePercentile=fJeePercentile,
-        #     Branch=fBranch,
-        #     Aim=fAim,
-        #     Objective=fObjective,
-        #     Mission=fMission,
-        #     Vision=fVision,
-        #     PlacementCell=fPlacementCell,
-        #     )
-        #     print(Stu)
 
         #placementOfficer
         #Message

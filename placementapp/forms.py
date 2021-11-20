@@ -22,13 +22,14 @@ class StudentSignUpForm(UserCreationForm):
     def save(self):
         user = super().save(commit=False)
         user.user_type=1
+        user.username=user.username.upper()
         user.save()
-        student = Student.objects.create(user=user,enrollment_no=self.cleaned_data['username'],Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
+        student = Student.objects.create(user=user,enrollment_no=self.cleaned_data['username'].upper(),Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
         #student.Email=*self.cleaned_data.get('email')
         return user
 
 class PlacementOfficerSignUpForm(UserCreationForm):
-    mobile_no=forms.IntegerField(max_value=9999999999,min_value=1111111111)
+    mobile_no=forms.IntegerField(max_value=9999999999,min_value=5111111111)
     password2=forms.CharField(widget=forms.PasswordInput)
     #PlacementCell=forms.ChoiceField(required=True,)
     class Meta:
@@ -61,9 +62,22 @@ class MentorSignUpForm(UserCreationForm):
         user.user_type=4
         user.verified=True
         user.save()
-        mentorr = Mentor.objects.create(user=user,first_name=self.cleaned_data['first_name'],Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
-        #student.Email=*self.cleaned_data.get('email')
         return user 
+
+class MentorProfile(forms.ModelForm):
+    class Meta:
+        model=Mentor
+        fields=("gender",)
+    @transaction.atomic
+    def save(self,user):
+        mentorr = Mentor.objects.create(
+            user=user,
+            first_name=user.first_name,
+            Email=user.email,
+            Mobile_No=user.mobile_no,
+            gender=self.cleaned_data['gender'])
+        #student.Email=*self.cleaned_data.get('email')
+        return mentorr 
 
 class CompanySignUpForm(UserCreationForm):
     mobile_no=forms.IntegerField(max_value=9999999999,min_value=1111111111)
@@ -77,10 +91,29 @@ class CompanySignUpForm(UserCreationForm):
     def save(self):
         user = super().save(commit=False)
         user.user_type=3
+        user.verified=True
         user.save()
-        comp = Company.objects.create(user=user,name=self.cleaned_data['first_name'],Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
+        #comp = Company.objects.create(user=user,Name=self.cleaned_data['username'],)
         #student.Email=*self.cleaned_data.get('email')
         return user 
+
+class CompanyProfile(forms.ModelForm):
+    class Meta:
+        model = Company
+        fields = ( 'Name', 'Description', 'MCA' , 'Revenue')
+        #label={'email':'Email addr'}
+
+    @transaction.atomic
+    def save(self,user):
+        
+        comp = Company.objects.create(
+            user=user,
+            Name=self.cleaned_data['Name'],
+            Description=self.cleaned_data['Description'],
+            MCA=self.cleaned_data['MCA'],
+            Revenue=self.cleaned_data['Revenue'],)
+        #student.Email=*self.cleaned_data.get('email')
+        return comp 
 
 class Schooldetails(forms.Form):
     SchoolName=forms.CharField(max_length=60,)
@@ -140,12 +173,27 @@ class PositionForm(forms.ModelForm):
         
     class Meta:
         model=Position
-        fields=('minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile')
+        fields=("Name",'minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile')
     branch = forms.ModelMultipleChoiceField(
-        queryset=Branch.objects.all(),
+        queryset=BranchDS.objects.all(),
         widget=forms.CheckboxSelectMultiple
     )
-
+class PositionPlacementForm(forms.ModelForm):
+    def __init__(self,*args, **kwargs):
+        """ Grants access to the request object so that only members of the current user
+        are given as options"""
+        #self.request = kwargs.pop('request')
+        
+        super(PositionPlacementForm, self).__init__(*args, **kwargs)
+        self.fields['branch'].queryset = BranchDS.objects.all()
+        
+    class Meta:
+        model=Position
+        fields=["Name","Company",'minCTC','maxCTC','Description','branch','minScore10','minScore12','minJeePercentile','Time','visible']
+    branch = forms.ModelMultipleChoiceField(
+        queryset=BranchDS.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
 class StudentStatus(forms.ModelForm):
     class Meta:
         model=Applied
@@ -158,7 +206,11 @@ class OfferForm(forms.ModelForm):
         #self.request = kwargs.pop('request')
         
         super(OfferForm, self).__init__(*args, **kwargs)
-        self.fields['Position'].queryset = Position.objects.filter(Company__user=user)
+        if user.user_type==3:
+            self.fields['Position'].queryset = Position.objects.filter(Company__user=user)
+        else:
+            self.fields['Position'].queryset = Position.objects.all()
+        
     
     class Meta:
         model=Offers
@@ -208,7 +260,7 @@ class CompanyForm(forms.ModelForm):
     class Meta:
         model=Company
         fields='__all__'
-
+        exclude=['user',]
 # class Export(forms.Form):
 #     enrollment_no=forms.BooleanField(required=False)
 #     first_name=forms.BooleanField(required=False)

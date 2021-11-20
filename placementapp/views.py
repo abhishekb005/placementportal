@@ -6,7 +6,7 @@ from django.db.models import query
 from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404,HttpResponseRedirect
 from .forms import *
 from django.core.files.storage import default_storage
-
+from django.http import Http404
 from django.contrib import messages
 from django.contrib.auth import login, authenticate,logout
 from django.contrib.auth.decorators import login_required
@@ -27,7 +27,7 @@ storage=firebase.storage()
 # Create your views here.
 def userlogin(request):
     if request.user.is_authenticated:
-        return HttpResponse('<h1> Current Session User is already Authenticated </h1>') 
+        return HttpResponse('<h1> Current Session User is already Authenticated <a href="/Dashboard"> Dashboard </a></h1>') 
         render(request,'placementapp/dashboard.html',{'user':request.user})
     else:
         if request.method=="POST":
@@ -53,7 +53,6 @@ def userlogout(request):
     messages.info(request,"You have Successfully logged out")
     return redirect("/login")
     
-
 def signup(request):
     if request.user.is_authenticated:
         return redirect("/dashboard")
@@ -74,11 +73,19 @@ def Stusignup(request):
     else:
         if request.method=='POST':
             form=StudentSignUpForm(request.POST)
+
             if form.is_valid():
                 form.save()
-                form=StudentSignUpForm()
+                messages.success(request, 'Student Registered Successfully !')
+                if request.user.user_type==2:
+                    form=StudentSignUpForm()
+                else:
+                    return redirect('/login')
                 #return render(request,'placementapp/signup.html',{'form':form})
+            else:
+                messages.error(request, 'Enter Valid Information')
         else:
+            messages.info(request, 'Enter University Enrollment No.(Upper Case) in Username Field else Account will not get Verifield')
             form=StudentSignUpForm()
         return render(request,'placementapp/Student/signup.html',{'form':form})
     
@@ -86,26 +93,46 @@ def CompanySignUp(request):
     if request.user.user_type==2 and request.user.verified:
         if request.method=='POST':
             form=CompanySignUpForm(request.POST)
-            if form.is_valid():
-                form.save()
+            form2=CompanyProfile(request.POST)
+            if form.is_valid() and form2.is_valid():
+                user=form.save()
+                if request.user.user_type==2:
+                    user.verified=True
+                else:
+                    user.verified=False
+                    user.save()
+                form2.save(user)
+                messages.success(request, 'Company registered successfully.')
                 form=CompanySignUpForm()
+                form2=CompanyProfile()
+            else:
+                messages.error(request, 'Company Sign Up Not Valid ,Fill the Form Correctly')
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=CompanySignUpForm()
-        return render(request,'placementapp/Company/signup.html',{'form':form})
+            form2=CompanyProfile()
+        return render(request,'placementapp/Company/signup.html',{'form':form,'form2':form2})
     return HttpResponse('<h1> Current User is not Authorised </h1>')
 
 def MentorSignUp(request):
     if request.user.user_type==2 and request.user.verified:
         if request.method=='POST':
             form=MentorSignUpForm(request.POST)
-            if form.is_valid():
+            form2=MentorProfile(request.POST)
+            if form.is_valid() and form2.is_valid():
                 form.save()
+                messages.success(request, 'Mentor registered successfully.')
+                
                 form=MentorSignUpForm()
+                form2=MentorProfile(request.POST)
+            else:
+                messages.error(request, 'Mentor Sign Up Not Valid ,Fill the Form Correctly')
+            
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=MentorSignUpForm()
-        return render(request,'placementapp/Mentor/signup.html',{'form':form})
+            form2=MentorProfile()
+        return render(request,'placementapp/Mentor/signup.html',{'form':form,'form2':form2})
     return HttpResponse('<h1> Current User is not Authorised </h1>')
 
 def PlacementOfficerSignUp(request):
@@ -114,7 +141,11 @@ def PlacementOfficerSignUp(request):
             form=PlacementOfficerSignUpForm(request.POST)
             if form.is_valid():
                 form.save()
+                messages.success(request, 'PlacementOfficer registered successfully.')
+         
                 form=PlacementOfficerSignUpForm()
+            else:
+                messages.error(request,f"Invalid Form , Fill Correctly")
                 #return render(request,'placementapp/signup.html',{'form':form})
         else:
             form=PlacementOfficerSignUpForm()
@@ -153,10 +184,10 @@ def applyForPosition(request,id):
         pos=Position.objects.get(pk=id)
         #branchds=pos.branch
         #if stu.branch in branchds:
-        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.maxCTC>Stu.maxCTC+2 :
+        if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.maxCTC>Stu.maxCTC+2 and pos.visible :
             Applied.objects.create(Position=pos,Student=Stu)
             print(f'{Stu} {pos}')
-            return HttpResponseRedirect('/ApplyPosition')
+            return redirect('/ApplyPosition')
         else:
             return HttpResponse('<h1> Not Eligible For Position Due To Marks Or Might Be Placed with Good CTC</h1>')
     else:
@@ -195,7 +226,11 @@ def StudentUpdateProfile(request):
                         messages.success(request, "File upload in Firebase Storage successful")
                         f.ResumeURL=url
                     f.save()
+                    messages.success(request, "Profile Updated Successfully")
+                else:
+                    messages.error(request,f"Invalid Form ,profile Not Updated")
             else:
+                messages.info(request,f"After Updating the Profile ,Only then This Account will be Verified")
                 form=StudentForm(instance=stu)
                 url=stu.ResumeURL
             return render(request,'placementapp/Student/UpdateProfile.html',{'form':form,'url':url})
@@ -462,7 +497,10 @@ def createPosition(request):
             pos=form.save(commit=False)
             pos.Company=comp
             pos.save()
-            
+            messages.success(request,f"Position Created Successfully")
+        else:
+            messages.error(request,f"Invalid Form , Position Not Created")
+    messages.info(request,f"Create A Position/Role for which The Company want to Hire Students")
     form=PositionForm()
     return render(request,'placementapp/Company/createposition.html',{'form':form})
     
@@ -476,16 +514,36 @@ def UpdatePosition(request,_id):
                 raise Http404('Does Not Exist')
         
             if request.method =='POST':
+                form =PositionPlacementForm(request.POST, instance =old_data)
+                if form.is_valid():
+                    form.save()
+                    return redirect(f'/Position')
+            else:
+                form = PositionPlacementForm(instance = old_data)
+                context ={
+                    'form':form
+                }
+                return render(request,'placementapp/PlacementOff/updateposition.html',context)
+        if request.user.user_type==3:
+
+            try:
+                old_data = get_object_or_404(Position,id =_id)
+                if old_data.Company.user!=request.user:
+                    return HttpResponse('<h1> Current Session User is not  Authorised</h1>')
+            except Exception:
+                raise Http404('Does Not Exist')
+        
+            if request.method =='POST':
                 form =PositionForm(request.POST, instance =old_data)
                 if form.is_valid():
                     form.save()
-                    return redirect(f'/Position/update/{_id}')
+                    return redirect(f'/Position')
             else:
                 form = PositionForm(instance = old_data)
                 context ={
                     'form':form
                 }
-                return render(request,'placementapp/PlacementOff/updateposition.html',context)
+                return render(request,'placementapp/Company/updateposition.html',context)
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
 
 def DeletePosition(request,_id):
@@ -512,11 +570,15 @@ def CreateOffer(request):
             if form.is_valid():
                 offer=form.save(commit=False)
                 offer.save()
-                return redirect('/')
+                messages.success(request,f'Offer Created Succesfully')
+                return redirect('/Dashboard')
+            else:
+                messages.error(request,f'invalid Form')
         else:
+            messages.info(request,f"Create Offer Group and Then Assign This Created offer to Selected Students")
             form=OfferForm(request.user)
             return render(request,'placementapp/Company/CreateOffer.html',{'form':form})    
-    return redirect('/')    
+    return redirect('/Dashboard')    
 
 def UpdateOffer(request,id):
     if request.user.is_authenticated and request.user.verified :
@@ -645,7 +707,9 @@ def UpdateCompany(request,id):
                 form = CompanyForm(request.POST, instance=company)
                 if form.is_valid():
                     form.save()
-                    return redirect(f'/Company/update/{id}')
+                    messages.success(request, ' Details Updated !')
+                
+                    return redirect(f'/CompanyList')
             else:
                 form = CompanyForm(instance = company)
                 context ={
@@ -998,7 +1062,8 @@ def export(request,headerrow,id,cusqueryset):
         for k in j:
             if k in headerrow:
                 bds=j[k].objects.get(pk=data[k])
-                data[k]=str(bds)
+                if bds is not None:
+                    data[k]=str(bds)
         writer.writerow(data.values())
     response['Content-Disposition'] = 'attachment; filename="Export.csv"'
     return response

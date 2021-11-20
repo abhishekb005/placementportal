@@ -16,7 +16,7 @@ class User(AbstractUser):
     verified=models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.user_type} {self.username} {self.first_name} {self.verified}"
+        return f"{self.first_name}"
 
 # Create your models here.
 class School(models.Model):
@@ -87,10 +87,10 @@ class PlacementCell(models.Model):
 class Company(models.Model):
     user=models.OneToOneField(to=User,on_delete=models.CASCADE,primary_key=True)
     Name=models.CharField(max_length=60)
-    Description=models.TextField()
-    MCA=models.CharField(verbose_name='MCA ID',max_length=50)
-    Type=models.CharField(verbose_name='Company Type',max_length=70)
-    revenue=models.BigIntegerField(verbose_name='Latest 1 year Revenue')
+    Description=models.TextField(null=True,blank=True)
+    MCA=models.CharField(verbose_name='MCA ID',max_length=50,null=True,blank=True)
+    Type=models.CharField(verbose_name='Company Type',max_length=70,null=True,blank=True)
+    Revenue=models.BigIntegerField(verbose_name='Latest 1 year Revenue In Crore',null=True,blank=True)
     
     def __str__(self):
         return f"{self.Name}"
@@ -105,9 +105,10 @@ class Position(models.Model):
     minScore10=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
     minScore12=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
     minJeePercentile=models.DecimalField(max_digits=4,decimal_places=2,default=0.00)
-
+    Time=models.DateTimeField(verbose_name='Apply By',null=True,blank=True)
+    visible=models.BooleanField(verbose_name="Visible to Student",default=False)
     def __str__(self):
-        return f"{self.Company}"
+        return f"{self.Name}"
 
 class Student(models.Model):
     user=models.OneToOneField(to=User,on_delete=models.CASCADE,primary_key=True)
@@ -123,8 +124,8 @@ class Student(models.Model):
     Mobile_No=models.PositiveBigIntegerField(null=False,blank=False)
     School10=models.ForeignKey(to=School,null=True,on_delete=models.SET_NULL,related_name='SchoolX')
     School12=models.ForeignKey(to=School,null=True,on_delete=models.SET_NULL,related_name='SchoolXII')
-    Score10=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
-    Score12=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
+    Score10=models.DecimalField(verbose_name="Grade 10 percentage",max_digits=4,decimal_places=2,null=True,blank=True)
+    Score12=models.DecimalField(verbose_name="Grade 12 Percentage",max_digits=4,decimal_places=2,null=True,blank=True)
     JeePercentile=models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     Branch=models.ForeignKey(to=BranchDS,on_delete=models.SET_NULL,null=True)
     Aim=models.TextField(null=True,blank=True,)
