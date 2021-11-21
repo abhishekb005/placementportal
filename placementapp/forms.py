@@ -24,7 +24,12 @@ class StudentSignUpForm(UserCreationForm):
         user.user_type=1
         user.username=user.username.upper()
         user.save()
-        student = Student.objects.create(user=user,enrollment_no=self.cleaned_data['username'].upper(),Email=self.cleaned_data['email'],Mobile_No=self.cleaned_data['mobile_no'],)
+        student = Student.objects.create(user=user,
+        enrollment_no=self.cleaned_data['username'].upper(),
+        Email=self.cleaned_data['email'],
+        Mobile_No=self.cleaned_data['mobile_no'],
+        first_name=self.cleaned_data['first_name'],
+        last_name=self.cleaned_data['last_name'],)
         #student.Email=*self.cleaned_data.get('email')
         return user
 
@@ -149,7 +154,7 @@ class StudentForm(forms.ModelForm):
     class Meta:
         model=Student
         fields='__all__'
-        exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12','ResumeURL']
+        exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12','ResumeURL','maxCTC']
 
 class AppliedForm(forms.ModelForm):
     #Student=forms.ModelChoiceField(disabled=True)
@@ -236,11 +241,16 @@ class AppliedForm(forms.ModelForm):
         model=Applied
         fields="__all__"
 
-# class MyAppliedForm(AppliedForm):
-#     def __init__(self, *args, user, **kwargs):
-#          self.user = user
-#          super().__init__(*args, **kwargs)
-
+class CustomPositionChar(forms.CharField):
+    def label_from_instance(self, position):
+        """ Customises the labels for checkboxes"""
+        return "%s" % position.Name
+class MyAppliedForm(AppliedForm):
+   # Position=CustomPositionChar()
+    def __init__(self, *args, **kwargs):
+        #self.fields['Position'].quer=["Data","Dat"]
+        super().__init__(*args, **kwargs)
+        
 # class BaseAppliedFormSet(BaseModelFormSet):
 #     def __init__(self, *args, **kwargs):
 #         super().__init__(*args, **kwargs)

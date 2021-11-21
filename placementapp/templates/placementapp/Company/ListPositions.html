@@ -10,7 +10,8 @@
 </head>
 <body>
     {% for Position in dataset %}
-{{Position}}
+{{Position.Name}}  {{Position.minCTC}}-{{Position.maxCTC}} {{"LPA"}} {%for branch in Position.branch.all%} {{branch}} {% endfor %}
+{% if Position.Time %} {{"Student Will Apply By "}}{{Position.Time}}{% endif %}
 <a href="{% url 'AppliedStudent' Position.id %}">View List of Applied Student For This Position</a>
 <hr>
 {% endfor %}

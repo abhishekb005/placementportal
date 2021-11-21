@@ -10,9 +10,15 @@
 </head>
 <body>
     {% for data in dataset %}
-{{data}}
+{{data.Student}}
+{{data.Student.first_name}}
 
-<a href="{% url 'StuDetail' data.Student.user.id  %}">Detail</a>
+{{data.Student.last_name}}
+{{data.Student.Branch}}
+
+{{data.Status}}
+
+<a href="{% url 'StuDetail' data.Student.user.id  %}">Student Detail </a>
 <hr>
 {% endfor %}
 </body>

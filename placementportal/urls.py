@@ -53,8 +53,8 @@ urlpatterns = [
 #company
     path('Offer',views.ListOffer),
     path('Offer/create',views.CreateOffer),
-    path('Offer/update/<int:id>/',views.UpdateOffer),
-    path('Offer/delete/<int:id>',views.DeleteOffer),
+    path('Offer/update/<int:id>/',views.UpdateOffer,name="UpdateOffer"),
+    path('Offer/delete/<int:id>',views.DeleteOffer,name="DeleteOffer"),
     path('assignOffer',views.AssignOffer),
     path('UpdateAppliedStuStatus',views.UpdateAppliedStuStatus),
     path('Position/<int:id>/ListStuApplied',views.ListOfAppliedStuForPos,name='AppliedStudent'),

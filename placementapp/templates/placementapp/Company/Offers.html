@@ -11,11 +11,14 @@
 <dl>  
     <dt>Position</dt>  
     <dd>{{data.Position}}</dd>  
-    <dt>Time</dt>  
-    <dd>{{data.Status}}</dd>  
-   <dt>Offer</dt>  
-   <dd>{{data.FinalOffer}}</dd>  
+    <dt>Description</dt>  
+    <dd>{{data.Description}}</dd>  
+   <dt>CTC</dt>  
+   <dd>{{data.FinalCTC}}</dd>  
   </dl> 
+<a href="{% url 'UpdateOffer' data.id  %}">Update Offer </a>
+<a href="{% url 'DeleteOffer' data.id  %}">Delete Offer </a>
+  <hr>
   {% endfor %}
 </body>
 </html>

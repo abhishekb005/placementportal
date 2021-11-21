@@ -10,16 +10,13 @@
 </head>
 <body>
     {% for pos in Positions %}
-    
-{{pos.Company}}
-{{pos.minCTC}}
-{{pos.maxCTC}}
-{% for branchds in pos.branch.all %}
-<br>
-{{branchds}}
-
-{% endfor %}
-
+{{"Role"}}{{pos.Name}}    
+{{"Company"}}{{pos.Company}}
+{{"CTC Range"}}{{pos.minCTC}}{{"-"}}{{pos.maxCTC}}
+{{pos.Description}}
+{% if pos.Time %}
+{{"Apply Before :"}}{{pos.Time}}
+{% endif %}
 <form action="{% url 'applypos' pos.id %}" method="post">
     {% csrf_token %}
     <input type="submit" value="Apply for the position">

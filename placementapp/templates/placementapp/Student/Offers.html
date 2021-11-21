@@ -9,10 +9,20 @@
     <title>Student form</title>
 </head>
 <body>
+    <h1>Offers In Hand </h1>
+    {% if dataset %}
+    <h4> List Of Offers </h4>
     {% for data in dataset %}
-{{data}}
+{{data.Position}}
+{{data.Position.Company}}
+{{data.Description}}
+{{data.FinalCTC}}
 <hr>
 {% endfor %}
+{% else %}
+{{"No Offers at Present"}}
+{% endif %}
+
 </body>
 </html>
 {% endblock %}

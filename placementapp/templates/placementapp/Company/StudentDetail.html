@@ -11,18 +11,36 @@
 
     {{dataset.enrollment_no}}
     <br>
+    {% if dataset is not None %}
     {{dataset.School10}}
+    {% endif %}
     <br>
     {{dataset.Branch}}
     <br>
     
     {% if dataset.ResumeURL %}
     <a href="{{dataset.ResumeURL}}"> download Resume</a>
+    <div>
+        <object
+          data='{{dataset.ResumeURL}}'
+          type="application/pdf"
+          width="500"
+          height="678"
+        >
+  
+          <iframe
+            src='{{dataset.ResumeURL}}'
+            width="500"
+            height="678"
+          >
+          <p>This browser does not support PDF!</p>
+          </iframe>
+  
+        </object>
+      </div>
+   
     {% endif %}
-    {% for pos in dataset.AppliedPositions.all %}
-    {{pos}}
-    <br>
-    {% endfor %}
+    
     {% endif %}
 </body>
 </html>

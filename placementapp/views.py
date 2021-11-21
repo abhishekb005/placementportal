@@ -77,7 +77,7 @@ def Stusignup(request):
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Student Registered Successfully !')
-                if request.user.user_type==2:
+                if request.user.is_authenticated and request.user.user_type==2:
                     form=StudentSignUpForm()
                 else:
                     return redirect('/login')
@@ -338,10 +338,14 @@ def UpdateApplied(request,id):
 def OfferStudentView(request):
     varuser=request.user
     if varuser.is_authenticated and varuser.verified and varuser.user_type==1:
-        applied=Applied.objects.filter(Student__user=varuser,Status='Selected')
-        if applied is None:
-            return HttpResponse('<h1>No Offers </h1>')
-        return render(request,'placementapp/Offers.html',{'dataset':applied})
+        applieds=Applied.objects.filter(Student__user=varuser,Status='Selected').exclude(FinalOffer=None)
+        offers=[]
+        if applieds is not  None:
+            for applied in applieds:
+                offers.append(applied.FinalOffer)
+            
+            return render(request,'placementapp/Student/Offers.html',{'dataset':offers})
+        return HttpResponse('<h1>No Offers </h1>')
     return HttpResponse('<h1> Session User not a verified Student </h1>')
 
 def ListOfAppliedStuForPos(request,id):
@@ -637,13 +641,13 @@ def DeleteOffer(request,id):
                 if Pos.Company.user==request.user:
                     print("Correct User")
                 else:
-                    data=None
+                    return HttpResponse("<H1>Not Authorised</H1>")
             except Exception:
                 raise Http404('Does Not Exist')
         
             if request.method == 'POST':
                 data.delete()
-                return redirect('/')
+                return HttpResponseRedirect('/Offer')
             else:
                 return render(request, 'placementapp/Company/deleteOffer.html')
         elif request.user.user_type==2:
@@ -656,7 +660,7 @@ def DeleteOffer(request,id):
         
             if request.method == 'POST':
                 data.delete()
-                return redirect('/')
+                return HttpResponseRedirect('/Offer')
             else:
                 return render(request, 'placementapp/PlacementOff/deleteOffer.html')
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
@@ -666,7 +670,10 @@ def ListOffer(request):
     if request.user.is_authenticated and request.user.verified:
         if request.user.user_type==1:
             Stu=Student.objects.get(user=request.user)
-            offers=Offers.objects.filter(Student=Stu).order_by('FinalCTC')
+            offers=[]
+            applieds=Applied.objects.filter(Student=Stu).exclude(FinalOffer=None)
+            for applied in applieds:
+                offers.append(applied.FinalOffer)
             return render(request,'placementapp/Student/Offers.html',{'dataset':offers})
         
         if request.user.user_type==3:
@@ -754,24 +761,29 @@ def ListPositionView(request):
 def AssignOffer(request):
     if request.user.is_authenticated and request.user.verified:
         if request.user.user_type==3:
-    
+            
             comp=Company.objects.get(user=request.user)
             AppliedForm=modelformset_factory(
                 Applied,
                 exclude=("Description",),
-                #formset=BaseAppliedFormSet,
-                #form=MyAppliedForm,
+                extra=0,
+               # formset=BaseAppliedFormSet,
+                form=MyAppliedForm,
             )
             if request.method=='POST':
                 formset=AppliedForm(
                 request.POST,
                 queryset=Applied.objects.filter(Position__Company=comp,Status='Selected'),
                 #form_kwargs={'user': request.user},
-                #user=request.user,
+               # user=request.user,
                 )
                 if formset.is_valid():
                     v=formset.save()
+                    messages.success(request,f"Offers Assigned Sucessfully")
+                else:
+                    messages.error(request,f"Failure:Offers Not Assigned")
             if request.method=='GET':
+                messages.info(request,f'Assign Offers To Selected Students')
                 formset=AppliedForm(
                     queryset=Applied.objects.filter(Position__Company=comp,Status='Selected')
                 #form_kwargs={'user': request.user},

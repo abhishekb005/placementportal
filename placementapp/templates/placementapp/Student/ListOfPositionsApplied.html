@@ -12,20 +12,22 @@
     {% for data in dataset %}
 <dl>  
     <dt>Position</dt>  
-    <dd>{{data.Position}}</dd>  
-    <dt>Time</dt>  
+    <dd>{{data.Position}}</dd>
+    <dt>Company</dt>  
+    <dd>{{data.Position.Company}}</dd>    
+    <dt>Applied At</dt>  
     <dd>{{data.Time}}</dd>  
    <dt>Status</dt>  
    <dd>{{data.Status}}</dd>  
-    <dt>Final Offer</dt>  
+   {% if data.FinalOffer %}
+    <dt>Offer Position</dt>  
+    <dd>{{data.FinalOffer.Position}}</dd>
+    <dt> Offer Description</dt>  
     <dd>{{data.FinalOffer}}</dd>
-    <dt>Branchs</dt> 
+    <dt> Offer CTC</dt>  
+    <dd>{{data.FinalOffer.FinalCTC}}</dd>
+   {% endif %} 
   </dl> 
-  {% for branchds in data.Position.branch.all %}
-
-{{branchds}}
-<br>
-{% endfor %}
 <br><hr>
 {% endfor %}
 </body>
