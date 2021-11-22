@@ -1,8 +1,11 @@
+import datetime
+from typing_extensions import final
 
 import pyrebase
 from django.conf.urls import include
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import query
+from django.db.models import query,Avg, Max, Min
+
 from django.shortcuts import redirect, render,HttpResponse,redirect,get_object_or_404,HttpResponseRedirect
 from .forms import *
 from django.core.files.storage import default_storage
@@ -173,7 +176,7 @@ def applyView(request):
                     max=applied.FinalOffer.FinalCTC
         Stu.maxCTC=max
         Stu.save()
-        position=Position.objects.filter(branch=Stu.Branch).exclude(id__in=alreadyAppliedPositions)
+        position=Position.objects.filter(branch=Stu.Branch,visible=True).exclude(id__in=alreadyAppliedPositions,)
         return render(request,'placementapp/Student/PositionApply.html',{'Positions':position})
     return HttpResponse('<h1> Current User is not A Student or  verified </h1>')
 
@@ -185,9 +188,9 @@ def applyForPosition(request,id):
         #branchds=pos.branch
         #if stu.branch in branchds:
         if pos.minScore10<=Stu.Score10 and pos.minScore12<=Stu.Score12 and pos.minJeePercentile<=Stu.JeePercentile and pos.maxCTC>Stu.maxCTC+2 and pos.visible :
-            Applied.objects.create(Position=pos,Student=Stu)
+            Applied.objects.get_or_create(Position=pos,Student=Stu)
             print(f'{Stu} {pos}')
-            return redirect('/ApplyPosition')
+            return HttpResponseRedirect('/ApplyPosition')
         else:
             return HttpResponse('<h1> Not Eligible For Position Due To Marks Or Might Be Placed with Good CTC</h1>')
     else:
@@ -239,9 +242,6 @@ def StudentUpdateProfile(request):
     else:
         return HttpResponse('<h1> Current Session User Not Authenticated </h1>') 
 
-def dashboard(request):
-    return render(request,'placementapp/dashboard.html')
-
 
 def getMsg2S(request):
     varuser=request.user
@@ -291,7 +291,7 @@ def ListOfPositionsApplied(request):
             return render(request,'placementapp/Student/ListOfPositionsApplied.html',{'dataset':applied})
 
         elif varuser.user_type==2:
-            applied=Applied.objects.all().order_by('Time')
+            applied=Applied.objects.all().order_by('-Time')
             return render(request,'placementapp/PlacementOff/ListOfApplied.html',{'dataset':applied})
 
     return HttpResponse('<h1> Session User not a verified User </h1>')
@@ -312,11 +312,11 @@ def DeleteApplied(request,id):
     except Exception:
         raise Http404('Does Not Exist')
  
-    if request.method == 'POST':
-        applied.delete()
-        return redirect('/')
-    else:
-        return render(request, 'placementapp/PlacementOff/deleteapplied.html')
+    #if request.method == 'POST':
+    applied.delete()
+    return HttpResponseRedirect('/applied')
+    # else:
+    #     return render(request, 'placementapp/PlacementOff/deleteapplied.html')
 
 def UpdateApplied(request,id):
     try:
@@ -561,7 +561,7 @@ def DeletePosition(request,_id):
         
             if request.method == 'POST':
                 data.delete()
-                return redirect('/')
+                return HttpResponseRedirect('/Position')
             else:
                 return render(request, 'placementapp/PlacementOff/deleteposition.html')
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
@@ -736,7 +736,7 @@ def DeleteCompany(request,id):
             if request.method == 'POST':
                 if company is not None:
                     company.delete()
-                return redirect('/')
+                return redirect('/CompanyList')
             else:
                 return render(request, 'placementapp/PlacementOff/deleteCompany.html')
     return HttpResponse('<h1> Current Session User is not  Authorised</h1>') 
@@ -778,7 +778,26 @@ def AssignOffer(request):
                # user=request.user,
                 )
                 if formset.is_valid():
-                    v=formset.save()
+                    
+                    v=formset.save(commit=False)
+                    for form in v:
+                        finaloffer=form.FinalOffer
+                        print(finaloffer)
+                        finalCTC=finaloffer.FinalCTC
+                        print(finalCTC)
+                        applieds=form
+                        Stuu=applieds.Student
+                        print(Stuu)
+                        Stumaxctc=Stuu.maxCTC
+                        print(Stumaxctc)
+                        if(Stumaxctc<finalCTC):
+                            Stuu.maxCTC=finalCTC
+                            Stuu.save()
+                        print(type(Stuu))
+                        print(type(form))
+                        print(str(form))
+                        form.save()
+                        
                     messages.success(request,f"Offers Assigned Sucessfully")
                 else:
                     messages.error(request,f"Failure:Offers Not Assigned")
@@ -1048,7 +1067,7 @@ def exportview(request,f_id):
         else:
             form=d[f_id]()
         return render(request,'placementapp/export.html',{'form':form})
-
+    return HttpResponse("<h1>Current User Have to Verified By the PlacementOfficer or Mentor Before using this Feature</h1>")
 
 def export(request,headerrow,id,cusqueryset):
     response = HttpResponse(content_type='text/csv')
@@ -1103,3 +1122,266 @@ def export(request,headerrow,id,cusqueryset):
 #   const app = initializeApp(firebaseConfig);
 #   const analytics = getAnalytics(app);
 # </script>
+def dashboard(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+            
+        print(f"getCtofPosApplied :{getCtofPosApplied(request)}")
+        print(f"getCtofOfferInHand :{getCtofOfferInHand(request)}")
+        print(f"getCtofPosSelectedIn :{getCtofPosSelectedIn(request)}")
+        print(f"getCtofPosUnderEval :{getCtofPosUnderEval(request)}")
+        print(f"getCtofPosRej :{getCtofPosRej(request)}")
+        print(f"getCtofPosNotApplied :{getCtofPosNotApplied(request)}")
+        print(f"getCtOfStuPlaced :{getCtOfStuPlaced(request)}")
+        print(f"getCountOfStudentOfSameDegreeAndSameStartYear :{getCtOfStuOfDASY(request)}")
+        print(f"getMaxCTCInHand :{getMaxCTCInHand(request)}")
+        dict={"getCtofPosApplied" :getCtofPosApplied(request),
+        "getCtofOfferInHand" :getCtofOfferInHand(request),
+        "getCtofPosSelectedIn" :getCtofPosSelectedIn(request),
+        "getCtofPosUnderEval" :getCtofPosUnderEval(request),
+        "getCtofPosRej" :getCtofPosRej(request),
+        "getCtofPosNotApplied" :getCtofPosNotApplied(request),
+        "getCtOfStuPlaced" :getCtOfStuPlaced(request),
+        "getCountOfStudentOfSameDegreeAndSameStartYear" :getCtOfStuOfDASY(request),
+        "getMaxCTCInHand" :getMaxCTCInHand(request),
+        }
+    if request.user.is_authenticated and request.user.user_type==2:
+            
+        print(f"getCtTotlStu :{getCtTotlStu(request)}")
+        print(f"getCtUnplacedStu :{getCtUnplacedStu(request)}")
+        print(f"getCtCompany :{getCtCompany(request)}")
+        print(f"getCtPlacedStu :{getCtPlacedStu(request)}")
+        print(f"getAvgCTC :{getAvgCTC(request)}")
+        print(f"getMaxCTC :{getMaxCTC(request)}")
+        print(f"getCtOfUnverifiedStu :{getCtOfUnverifiedStu(request)}")
+        dict={"getCtTotlStu" :getCtTotlStu(request),
+        "getCtUnplacedStu" :getCtUnplacedStu(request),
+        "getCtCompany" :getCtCompany(request),
+        "getCtPlacedStu" :getCtPlacedStu(request),
+        "getAvgCTC" :getAvgCTC(request),
+        "getMaxCTC" :getMaxCTC(request),
+        "getCtOfUnverifiedStu" :getCtOfUnverifiedStu(request),
+        }
+    if request.user.is_authenticated and request.user.user_type==3:
+            
+        print(f"getCtStuAppliedForComp :{getCtStuAppliedForComp(request)}")
+        print(f"getCtStuSelected :{getCtStuSelected(request)}")
+        print(f"getCtStuUnderEval :{getCtStuUnderEval(request)}")
+        print(f"getCtStuRej :{getCtStuRej(request)}")
+        print(f"getCtPosCreated :{getCtPosCreated(request)}")
+        print(f"getCtOffersCreated :{getCtOffersCreated(request)}")
+        print(f"getCtOfOffersAssigned :{getCtOfOffersAssigned(request)}")
+        dict={"getCtStuAppliedForComp" :getCtStuAppliedForComp(request),
+        "getCtStuSelected" :getCtStuSelected(request),
+        "getCtStuUnderEval" :getCtStuUnderEval(request),
+        "getCtStuRej" :getCtStuRej(request),
+        "getCtOffersCreated" :getCtOffersCreated(request),
+        "getCtPosCreated" :getCtPosCreated(request),
+        "getCtOfOffersAssigned" :getCtOfOffersAssigned(request),
+        }
+    if request.user.is_authenticated and request.user.user_type==4:
+            
+        print(f"getCtStuAssigned :{getCtStuAssigned(request)}")
+        print(f"getCtStuVerified :{getCtStuVerified(request)}")
+        print(f"getCtUnplacedStu :{getCtUnplacedStu(request)}")
+        print(f"getCtPlacedStu :{getCtPlacedStu(request)}")
+        print(f"getAvgCTC :{getAvgCTC(request)}")
+        dict={"getCtStuAssigned" :getCtStuAssigned(request),
+        "getCtStuVerified" :getCtStuVerified(request),
+        "getCtUnplacedStu" :getCtUnplacedStu(request),
+        "getCtPlacedStu" :getCtPlacedStu(request),
+        "getAvgCTC" :getAvgCTC(request),
+        }
+    return render(request,'placementapp/dashboard.html',{"data":dict})
+
+
+#Student
+def getCtofPosApplied(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        applieds=Applied.objects.filter(Student__user=request.user).count()
+        return applieds
+    return 0
+def getCtofOfferInHand(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        offersInHand=Applied.objects.filter(Student__user=request.user).exclude(FinalOffer=None).count()
+        return offersInHand
+    return 0
+def getCtofPosSelectedIn(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        selectedIn=Applied.objects.filter(Student__user=request.user,Status='Selected').count()
+        return selectedIn
+    return 0
+
+def getCtofPosUnderEval(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        underEval=Applied.objects.filter(Student__user=request.user,Status='UnderEvaluation').count()
+        return underEval
+    return 0
+    
+def getCtofPosRej(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        rejIn=Applied.objects.filter(Student__user=request.user,Status='Rejected').count()
+        return rejIn
+    return 0
+    
+def getCtofPosNotApplied(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        alreadyApplied=Applied.objects.filter(Student__user=request.user,)
+        alreadyAppliedPositions=[]
+        alreadyAppliedOffer=[]
+        Stu=Student.objects.get(user=request.user)
+        
+        for applied in alreadyApplied:
+            alreadyAppliedPositions.append(applied.Position.id)
+            
+        position=Position.objects.filter(branch=Stu.Branch,visible=True).exclude(id__in=alreadyAppliedPositions).count()
+        return position
+    return 0
+def getCtofStuAppliedForPos(request,pos_id):
+    if request.user.is_authenticated and request.user.user_type==1:
+        countStu=Applied.objects.filter(Position__id=pos_id).count()
+        return countStu
+    return 0
+def getCtOfStuPlaced(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        Stu=Student.objects.get(user=request.user)
+        CtPlacedStu=Student.objects.exclude(maxCTC=0,user__verified=False).filter(Branch__degree=Stu.Branch.degree,Branch__Start_year=Stu.Branch.Start_year).count()
+        return CtPlacedStu
+    return 0
+
+    #getCountOfStudentOfSameDegreeAndSameStartYear
+def getCtOfStuOfDASY(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        Stu=Student.objects.get(user=request.user)
+        CtStu=Student.objects.exclude(user__verified=False).filter(Branch__degree=Stu.Branch.degree,Branch__Start_year=Stu.Branch.Start_year).count()
+        return CtStu
+    return 0
+def getMaxCTCInHand(request):
+    if request.user.is_authenticated and request.user.user_type==1:
+        Stu=Student.objects.get(user=request.user)
+
+        return Stu.maxCTC
+    return 0
+#Company
+def getCtStuAppliedForComp(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        comp=Company.objects.get(user=request.user)
+        applied=Applied.objects.filter(Position__Company=comp).count()
+        return applied
+    return 0
+def getCtStuSelected(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        selectedIn=Applied.objects.filter(Position__Company__user=request.user,Status='Selected').count()
+        return selectedIn
+    if request.user.is_authenticated and request.user.user_type==4:
+        selectedIn=Applied.objects.filter(Student__mentor__user=request.user,Status='Selected').count()
+        return selectedIn
+    return 0
+def getCtStuUnderEval(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        underEval=Applied.objects.filter(Position__Company__user=request.user,Status='Under Evaluation').count()
+        return underEval
+    if request.user.is_authenticated and request.user.user_type==4:
+        underEval=Applied.objects.filter(Student__mentor__user=request.user,Status='Under Evaluation').count()
+        return underEval
+    return 0
+def getCtStuRej(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        rejIn=Applied.objects.filter(Position__Company__user=request.user,Status='Rejected').count()
+        return rejIn
+    if request.user.is_authenticated and request.user.user_type==4:
+        rejIn=Applied.objects.filter(Student__mentor__user=request.user,Status='Rejected').count()
+        return rejIn
+    return 0
+def getCtPosCreated(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        CtPos=Position.objects.filter(Company__user=request.user).count()
+        return CtPos
+    return 0
+def getCtOffersCreated(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        CtOffer=Offers.objects.filter(Position__Company__user=request.user).count()
+        return CtOffer
+    return 0
+def getCtOfOffersAssigned(request):
+    if request.user.is_authenticated and request.user.user_type==3:
+        CtOffers=Applied.objects.filter(Position__Company__user=request.user,FinalOffer__Position__Company__user=request.user).count()
+        return CtOffers
+    return 0
+#PlacementOff
+def getCtTotlStu(request):
+    if request.user.is_authenticated and request.user.user_type==2:
+        totalStu=0
+        
+        x = datetime.now()
+
+        totalStuCurrYr=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-3).count()
+        totalStuPrevYr=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-4).count()
+        totalStu=Student.objects.filter(user__verified=True).count()
+        totalStuDict={"totalStuCurrYr":totalStuCurrYr,
+        "totalStuPrevYr":totalStuPrevYr,
+        "totalStu":totalStu,
+        }
+        return totalStu
+    return 0
+def getCtUnplacedStu(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        x = datetime.now()   
+        unplacedStu=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-3,maxCTC=0).count()
+        return unplacedStu
+    
+    if request.user.is_authenticated and request.user.user_type==4: 
+        CtStu=Student.objects.filter(mentor__user=request.user,maxCTC=0).count()
+        return CtStu
+    return 0
+def getCtCompany(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        CtComp=Company.objects.all().count()
+        return CtComp
+    return 0
+
+def getCtPlacedStu(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        x = datetime.now()   
+        placedStu=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-3).exclude(maxCTC=0).count()
+        return placedStu
+    if request.user.is_authenticated and request.user.user_type==4: 
+        CtStu=Student.objects.filter(user__verified=True,mentor__user=request.user).exclude(maxCTC=0).count()
+        return CtStu
+    
+    return 0
+def getAvgCTC(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        x = datetime.now()   
+        avgCTC=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-3).exclude(maxCTC=0).aggregate(average_CTC=Avg('maxCTC'))
+        if avgCTC['average_CTC'] is not None:
+            return avgCTC['average_CTC']
+    if request.user.is_authenticated and request.user.user_type==4: 
+        
+        avgCTC=Student.objects.filter(user__verified=True,mentor__user=request.user).exclude(maxCTC=0).aggregate(average_CTC=Avg('maxCTC'))
+        if avgCTC['average_CTC'] is not None:
+            return avgCTC['average_CTC']
+    return 0
+def getMaxCTC(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        x = datetime.now()   
+        maxCTC=Student.objects.filter(user__verified=True,Branch__Start_year=x.year-3).aggregate(max_CTC=Max('maxCTC'))
+        return maxCTC['max_CTC']
+    return 0
+def getCtOfUnverifiedStu(request):
+    if request.user.is_authenticated and request.user.user_type==2: 
+        CtUnverified=User.objects.filter(user_type=1,verified=False).count()
+        return CtUnverified
+    return 0
+#Mentor
+def getCtStuAssigned(request):
+    if request.user.is_authenticated and request.user.user_type==4: 
+        CtStu=Student.objects.filter(mentor__user=request.user).count()
+        return CtStu
+    return 0
+def getCtStuVerified(request):
+    if request.user.is_authenticated and request.user.user_type==4: 
+        CtStu=Student.objects.filter(mentor__user=request.user,user__verified=True).count()
+        return CtStu
+    return 0
+
+

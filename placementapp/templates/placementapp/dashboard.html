@@ -12,7 +12,9 @@
 {% block content %}
 {% if user.is_authenticated %}
 {% if user.user_type == 1 %}
-
+{% for key, value in data.items %}
+  <li>{{ key }} : {{ value }}</li>
+{% endfor %}
 Hello Student, {{ user.username|default:'Guest' }}!
 <br>
 <a href="/UpdateProfile">Student Profile Update</a>
@@ -29,7 +31,9 @@ Hello Student, {{ user.username|default:'Guest' }}!
 {% if user.user_type == 4 %}
 
 Hello Mentor, {{ user.username|default:'Guest' }}!
-
+{% for key, value in data.items %}
+  <li>{{ key }} : {{ value }}</li>
+{% endfor %}
 <br>
 <a href="/Dashboard">Dashboard</a>
 <br>
@@ -47,7 +51,9 @@ Hello Mentor, {{ user.username|default:'Guest' }}!
 <br>
 {% endif %}
 {% if user.user_type == 3 %}
-
+{% for key, value in data.items %}
+  <li>{{ key }} : {{ value }}</li>
+{% endfor %}
 Hello Company, {{ user.username|default:'Guest' }}!
 
 <br>
@@ -73,6 +79,9 @@ Hello Company, {{ user.username|default:'Guest' }}!
 <br>
 {% endif %}
 {% if user.user_type == 2 %}
+{% for key, value in data.items %}
+  <li>{{ key }} : {{ value }}</li>
+{% endfor %}
 
 Hello Placement Officer, {{ user.username|default:'Guest' }}!
 

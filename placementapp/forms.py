@@ -155,7 +155,7 @@ class StudentForm(forms.ModelForm):
         model=Student
         fields='__all__'
         exclude = ['user','enrollment_no','AppliedPositions','PlacementCell','mentor','School10','School12','ResumeURL','maxCTC']
-
+    
 class AppliedForm(forms.ModelForm):
     #Student=forms.ModelChoiceField(disabled=True)
     class Meta:
@@ -265,7 +265,9 @@ class UpdateAppliedStuStatusForm(forms.ModelForm):
     class Meta:
         model=Applied
         fields=["Student","Position","Status"]
-
+   # Student=
+   # Position=
+   # Status=
 class CompanyForm(forms.ModelForm):
     class Meta:
         model=Company
