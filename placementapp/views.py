@@ -601,9 +601,13 @@ def UpdateOffer(request,id):
             if request.method =='POST':
                 form =OfferForm(request.user,request.POST, instance =old_data)
                 if form.is_valid():
+                    messages.success(request,f"Offer Updated Succesfully")
                     form.save()
                     return redirect(f'/Offer/update/{id}')
+                else:
+                    messages.error(request,f"Invalid Form Submitted ")
             else:
+                messages.info(request,f"Update The Offer Created for A Position")
                 form = OfferForm(request.user,instance = old_data)
                 context ={
                     'form':form
@@ -621,9 +625,16 @@ def UpdateOffer(request,id):
                 form =OfferForm(request.user,request.POST, instance =old_data)
                 if form.is_valid():
                     form.save()
+                    messages.success(request,f"Offer Updated Succesfully")
+                    
                     return redirect(f'/Offer/update/{id}')
+                else:
+                    messages.error(request,f"Invalid Form Submitted ")
+            
             else:
                 form = OfferForm(request.user,instance = old_data)
+                messages.info(request,f"Update The Offer Created for A Position")
+                
                 context ={
                     'form':form
                 }
@@ -647,6 +658,9 @@ def DeleteOffer(request,id):
         
             if request.method == 'POST':
                 data.delete()
+                
+                messages.success(request,f"Deleted Succesfully ")
+                
                 return HttpResponseRedirect('/Offer')
             else:
                 return render(request, 'placementapp/Company/deleteOffer.html')
@@ -660,6 +674,8 @@ def DeleteOffer(request,id):
         
             if request.method == 'POST':
                 data.delete()
+                messages.success(request,f"Deleted Succesfully ")
+                
                 return HttpResponseRedirect('/Offer')
             else:
                 return render(request, 'placementapp/PlacementOff/deleteOffer.html')
@@ -851,14 +867,17 @@ def AddStudentMentor(request):
                         if Stu.mentor is None:
                             Stu.mentor=Mentorr
                             Stu.save()
+                            messages.success(request,f"Student Added succesfully")
+                            
                             print(Stu)
                         else:
-                            messages.info(request,f"Mentor Already Assigned")
+                            messages.error(request,f"Mentor Already Assigned")
                             print("Mentor Already Assigned")
                     else:
                         print("Not Correct UserName")
                     
-        
+        messages.info(request,f"Mentor Already Assigned")
+                            
         formset=StudentMentorForm(
             queryset=Student.objects.filter(mentor__user=varuser),
             #form_kwargs={'user': request.user},
@@ -891,10 +910,13 @@ def UpdateAppliedStuStatus(request):
                 )
                 if formset.is_valid():
                     v=formset.save()
-            
+                    messages.success(request,f"Status Updated succesfully")
+                            
             formset=AppliedForm(
                 queryset=Applied.objects.filter(Position__Company=comp).exclude(Status="Rejected")
                 )
+            messages.info(request,f"Student's  candidature Status ")
+                            
             for form in formset:
                 form.fields['Position'].queryset=Position.objects.filter(Company=comp)
                 form.fields['Student'].queryset=Student.objects.filter(AppliedPositions__Company=comp)
@@ -935,12 +957,14 @@ def VerifyStudentView(request):
                 v=formset.save(commit=False)
                 for obj in v:
                     obj.save()
+                messages.success(request,f"Students Verified Succesfully")
                     #Stu=Student.objects.get(enrollment_no=obj.enrollment_no)
                     #Stu.mentor=Mentorr
                     #Stu.save()
                     #print(Stu)
-                
-        
+            else:
+                messages.error(request,f"Student's Verification Failed")    
+        messages.info(request,f"Check Student's Profile Before Marking verified")
         formset=StudentMentorForm(
             queryset=User.objects.filter(id__in=userr),
             #form_kwargs={'user': request.user},
@@ -954,46 +978,46 @@ def VerifyStudentView(request):
     return HttpResponse("<h1> Not Authorised</h1>")
 
 
-def export(request,headerrow):
-    response = HttpResponse(content_type='text/csv')
-    writer = csv.writer(response)
-    writer.writerow(headerrow)
-    print(headerrow)
-    if "AppliedPosition" in headerrow:
-        headerrow.remove("AppliedPosition") 
-    for student in Student.objects.all().values(*headerrow):
+# def export(request,headerrow):
+#     response = HttpResponse(content_type='text/csv')
+#     writer = csv.writer(response)
+#     writer.writerow(headerrow)
+#     print(headerrow)
+#     if "AppliedPosition" in headerrow:
+#         headerrow.remove("AppliedPosition") 
+#     for student in Student.objects.all().values(*headerrow):
     
-        if "Branch" in headerrow:
-            bds=BranchDS.objects.get(pk=student['Branch'])
-            student['Branch']=str(bds)
-        writer.writerow(student.values())
-    response['Content-Disposition'] = 'attachment; filename="students.csv"'
-    return response
+#         if "Branch" in headerrow:
+#             bds=BranchDS.objects.get(pk=student['Branch'])
+#             student['Branch']=str(bds)
+#         writer.writerow(student.values())
+#     response['Content-Disposition'] = 'attachment; filename="students.csv"'
+#     return response
 
 
-def home_view(request):
-    w=['enrollment_no','first_name','last_name','gender','Email','Mobile_No','School10','School12','Score10','Score12','JeePercentile',
-      'Branch']
+# def home_view(request):
+#     w=['enrollment_no','first_name','last_name','gender','Email','Mobile_No','School10','School12','Score10','Score12','JeePercentile',
+#       'Branch']
     
-    w1=[]
-    r=[]
-    if request.method=='POST':
-        form=Export(request.POST)
-        if form.is_valid():
-            for fields in form:
-                s=form.cleaned_data[fields.html_name]
-                w1.append(fields.html_name)
-                print()
-                if s==True:
-                    r.append(fields.html_name)
+#     w1=[]
+#     r=[]
+#     if request.method=='POST':
+#         form=Export(request.POST)
+#         if form.is_valid():
+#             for fields in form:
+#                 s=form.cleaned_data[fields.html_name]
+#                 w1.append(fields.html_name)
+#                 print()
+#                 if s==True:
+#                     r.append(fields.html_name)
                 
-        print(r)
+#         print(r)
         
-        form=Export()
-        return export(request,r)         
-    else:
-        form=Export()
-    return render(request,'placementapp/export.html',{'form':form})
+#         form=Export()
+#         return export(request,r)         
+#     else:
+#         form=Export()
+#     return render(request,'placementapp/export.html',{'form':form})
     
 def exportview(request,f_id):
     if request.user.is_authenticated and request.user.verified:
@@ -1356,7 +1380,6 @@ def getAvgCTC(request):
         if avgCTC['average_CTC'] is not None:
             return avgCTC['average_CTC']
     if request.user.is_authenticated and request.user.user_type==4: 
-        
         avgCTC=Student.objects.filter(user__verified=True,mentor__user=request.user).exclude(maxCTC=0).aggregate(average_CTC=Avg('maxCTC'))
         if avgCTC['average_CTC'] is not None:
             return avgCTC['average_CTC']
@@ -1383,5 +1406,4 @@ def getCtStuVerified(request):
         CtStu=Student.objects.filter(mentor__user=request.user,user__verified=True).count()
         return CtStu
     return 0
-
 
